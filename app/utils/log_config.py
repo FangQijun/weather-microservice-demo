@@ -8,6 +8,10 @@ def setup_logging(logs_dir, logs_sub_dir, module_name):
     
     Parameters:
     -----------
+    logs_dir : str
+        Name of the directory where logs are stored
+    logs_sub_dir : str
+        Name of the sub-directory where logs are stored
     module_name : str
         Name of the module (used for the logger name and log file)
         
