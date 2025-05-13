@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 import pygris  # This package provides easy access to Census TIGER/Line data
@@ -50,5 +51,15 @@ def create_us_grid(shapefile_path=None, output_path=None):
     rows, columns = contiguous_us.shape
     list_states = sorted(contiguous_us['STUSPS'].unique())
     logger.info(f"After filtering, # of Rows: {rows}, # of Columns: {columns}, including states: {list_states}")
+
+    # Project to an equal-area projection suitable for the US (EPSG:5070 - NAD83 / Conus Albers)
+    contiguous_us = contiguous_us.to_crs(epsg=5070)
+    minx, miny, maxx, maxy = contiguous_us.total_bounds  # Bounding box of the contiguous US
+    cell_size = 2500
+    
+    # Calculate the number of cells in x and y direction
+    logger.info(f"")
+    nx, ny = int(np.ceil((maxx - minx) / cell_size)), int(np.ceil((maxy - miny) / cell_size))    
+    logger.info(f"Creating {nx} x {ny} = {nx * ny} grids...")  # 1846 * 1162 = 2,145,052 grids in total
 
     return None
