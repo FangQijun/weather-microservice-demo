@@ -1,11 +1,11 @@
 # Ignore everything in data and logs directories
 data/shapefile/*
-logs/*
+logs/extract/*
 
 # But keep the .gitkeep files
 !data/.gitkeep
 !data/shapefile/.gitkeep
-!logs/.gitkeep
+!logs/extract/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
