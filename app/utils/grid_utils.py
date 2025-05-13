@@ -28,9 +28,13 @@ def create_us_grid(shapefile_path=None, output_path=None):
     # Load US states boundaries (most recent version) using pygris
     logger.info(f"Loading official US boundary data from Census Bureau...")
     us_states = pygris.states(year=2024)  # Returns a GeoDataFrame
+    us_states = us_states.sort_values(by="GEOID")
     logger.info(f"Loaded official US boundary data from Census Bureau!")
     logger.info(f"Returned US states data type: {type(us_states)}.")
-    logger.info("Returned US states data summary: {}".format(us_states.head(3)))
+    logger.info("Returned US states data summary: \n{}".format(us_states.head(6)))
+    rows, columns = us_states.shape
+    list_states = sorted(us_states['STUSPS'].unique())
+    logger.info(f"Before filtering, # of Rows: {rows}, # of Columns: {columns}, including states: {list_states}")
 
     try:
         us_states.to_file(shapefile_path)
@@ -38,5 +42,13 @@ def create_us_grid(shapefile_path=None, output_path=None):
     except Exception as e:
         logger.error(f"Error saving shapefile: {e}")
         return None
+    
+    # Filter to contiguous 48 states + DC (excluding Alaska, Hawaii, and territories)
+    contiguous_fips = [str(i).zfill(2) for i in range(1, 57)
+                     if i not in [2, 15, 60, 66, 69, 72, 78]]  # Exclude AK, HI, territories
+    contiguous_us = us_states[us_states['GEOID'].isin(contiguous_fips)]
+    rows, columns = contiguous_us.shape
+    list_states = sorted(contiguous_us['STUSPS'].unique())
+    logger.info(f"After filtering, # of Rows: {rows}, # of Columns: {columns}, including states: {list_states}")
 
     return None
