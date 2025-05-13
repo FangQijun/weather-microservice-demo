@@ -1,9 +1,10 @@
 # Ignore everything in data and logs directories
-data/*
+data/shapefile/*
 logs/*
 
 # But keep the .gitkeep files
 !data/.gitkeep
+!data/shapefile/.gitkeep
 !logs/.gitkeep
 
 # Byte-compiled / optimized / DLL files
