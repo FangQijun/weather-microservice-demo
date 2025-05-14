@@ -44,12 +44,14 @@ def process_nws_responses(json_strings: list[str], output_path: str, verbose=Fal
     # Extract desired fields
     for json_string in json_strings:
         try:
-            data = json.loads(json_string)
+            json_data = json.loads(json_string)
             
-            if isinstance(data, dict):  # All needed data is in key "properties"
+            if isinstance(json_data, dict):  # All needed json_data is in key "properties"
                 record = {}
-                if "geometry" in data and "coordinates" in data["geometry"]:
-                    coordinate = data["geometry"]["coordinates"]
+                if "id" in json_data:
+                    record["api_call_id"] = json_data["id"]
+                if "geometry" in json_data and "coordinates" in json_data["geometry"]:
+                    coordinate = json_data["geometry"]["coordinates"]
                     if len(coordinate) == 2:
                         record["centroid_lon"] = coordinate[0]
                         record["centroid_lat"] = coordinate[1]
@@ -57,12 +59,12 @@ def process_nws_responses(json_strings: list[str], output_path: str, verbose=Fal
                         e = "Expected an array of length 2 in key 'geometry.coordinates' but got the wrong length."
                         logger.error(e)
                         raise ValueError(e)
-                if "properties" in data:
-                    properties = data["properties"]
+                if "properties" in json_data:
+                    properties = json_data["properties"]
                     for key in keys_to_extract:
                         record[key] = properties.get(key, "")
                     all_records.append(record)
-            elif isinstance(data, list):
+            elif isinstance(json_data, list):
                 e = "Expected key 'properties' in a dictionary but doesn't exist."
                 logger.error(e)
                 raise ValueError(e)
@@ -99,7 +101,7 @@ def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, bat
     output_path : str
         Path to the output TSV file
     num_points_limit : int
-        Number of points to process (default: None)
+        Number of points to process (default: None, process all points)
     batch_size : int
         Number of points to process in each batch (default: 10)
     verbose : bool
