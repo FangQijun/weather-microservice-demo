@@ -124,8 +124,8 @@ def create_us_grid(shapefile_path=None, output_path=None, align_with_coords=Fals
     logger.info(f"There are {len(grids_filtered)} centroids in total.")
     
     centroid_gdf = centroid_gdf.to_crs(epsg=4326)  # Reproject centroids to WGS84 (EPSG:4326) for real lat/lon values
-    grids_filtered['centroid_lon'] = centroid_gdf.geometry.x
-    grids_filtered['centroid_lat'] = centroid_gdf.geometry.y
+    grids_filtered['centroid_lon'] = centroid_gdf.geometry.x.round(4)
+    grids_filtered['centroid_lat'] = centroid_gdf.geometry.y.round(4)
     
     logger.info(f"Final GeoDataFrame contains {len(grids_filtered)} grids.")
     logger.info(f"Filtered out {len(contiguous_us) - len(grids_filtered)} grids that don't overlap with the contiguous US!")
