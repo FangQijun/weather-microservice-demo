@@ -2,7 +2,7 @@
 A microservice for weather API data ETL
 
 # Thought Processes
-1. It is a 2-step process to get forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
+1. It is a 2-step process to get the weather forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
    1. Step 1 is to inquire which `gridpoint` (a 2.5km x 2.5km rectangle on the map of the United States represented by an office code consisting of 3 capital letters and two integers) which a specific lat/lon is located in with a payload looking like `https://api.weather.gov/points/{latitude},{longitude}`
    2. Step 2 is to obtain the grid forecast for a `gridpoint`, use the `/points` endpoint to retrieve the current grid forecast endpoint by coordinates with a payload looking like `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast` and `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast/hourly`
 2. Gridpoints WFO/x/y should not be considered static but won't be updated often according to [the GitHub Q&A thread](https://github.com/weather-gov/api/discussions/621)
@@ -14,8 +14,9 @@ A microservice for weather API data ETL
    3. With all the API responses, we can set up an SCD2 lookup table on our own database to find out which Gridpoint a requested lat/lon belongs to. To pull such mapping offline, instead of making an API call each time a request comes in, we reduced latency and enhanced reliability.
 
 # Project References
-1. [Google Earth Pro](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize open-sourced `.shp` files.
-2. [pygris](https://walker-data.com/pygris/), a Python package to help users access US Census Bureau TIGER/Line and cartographic boundary shapefiles and load them into Python as GeoDataFrames.
+1. [National Weather Service API](https://www.weather.gov/documentation/services-web-api)
+2. National Weather Service API [forecast update schedule](https://www.weather.gov/gid/nwr_general), hourly weather forecasts are updated every hour approximately 5 minutes after the top of the hour.
 3. [U.S. States coordinate polygon data](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2024&layergroup=States+%28and+equivalent%29) from U.S. Census.
-4. According to [this doc](https://www.weather.gov/gid/nwr_general), hourly weather forecasts are updated every hour approximately 5 minutes after the top of the hour.
-5. Web tool to [stitch images](https://pinetools.com/merge-images).
+4. [pygris](https://walker-data.com/pygris/), a Python package to help users access US Census Bureau TIGER/Line and cartographic boundary shapefiles and load them into Python as GeoDataFrames.
+5. [Google Earth Pro](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize open-sourced `.shp` files.
+6. Web tool to [stitch images](https://pinetools.com/merge-images).
