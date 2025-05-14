@@ -77,12 +77,10 @@ def create_us_grid(shapefile_path=None, output_path=None, align_with_coords=Fals
     nx, ny = int(np.ceil((maxx - minx) / cell_size)), int(np.ceil((maxy - miny) / cell_size))    
     logger.info(f"Creating {nx} x {ny} = {nx * ny} grids...")  # 1846 * 1162 = 2,145,052 grids in total
 
-    # Create the grid cells
     grid_list = []
     grid_ids = []
     centroids = []
     m = 0
-    
     for i in range(nx):
         for j in range(ny):
             # Grid boundaries
@@ -99,7 +97,7 @@ def create_us_grid(shapefile_path=None, output_path=None, align_with_coords=Fals
             centroids.append(ctrd)
             m += 1
     
-    grid = gpd.GeoDataFrame(
+    grids = gpd.GeoDataFrame(
         {
             'id': grid_ids,
             'geometry': grid_list,
@@ -114,7 +112,7 @@ def create_us_grid(shapefile_path=None, output_path=None, align_with_coords=Fals
     # Caution: this is a very large dataset, and the intersection operation can be slow...
     # It takes about 14 minutes to run on 16GB M4 Mac Mini
     contiguous_us_dissolved = contiguous_us.dissolve()
-    grids_filtered = grid[grid.intersects(contiguous_us_dissolved.iloc[0].geometry)]
+    grids_filtered = grids[grids.intersects(contiguous_us_dissolved.iloc[0].geometry)]
 
     # Create a GeoDataFrame with just the centroids for reprojection
     centroid_gdf = gpd.GeoDataFrame(
@@ -126,11 +124,17 @@ def create_us_grid(shapefile_path=None, output_path=None, align_with_coords=Fals
     centroid_gdf = centroid_gdf.to_crs(epsg=4326)  # Reproject centroids to WGS84 (EPSG:4326) for real lat/lon values
     grids_filtered['cent_lon'] = centroid_gdf.geometry.x.round(4)
     grids_filtered['cent_lat'] = centroid_gdf.geometry.y.round(4)
+    grids_filtered = grids_filtered.sort_values(
+        by=["cent_lat", "cent_lon"],
+        ascending=[False, False]
+    )
     
     logger.info(f"Final GeoDataFrame contains {len(grids_filtered)} grids.")
     logger.info(f"Filtered out {len(contiguous_us) - len(grids_filtered)} grids that don't overlap with the contiguous US!")
     logger.info(f"Filtered US states data type: {type(grids_filtered)}.")
+    logger.info(f"Filtered US states column data type: {grids_filtered.dtypes}.")
     logger.info("Filtered US states data summary: \n{}".format(grids_filtered.head(6)))
+    logger.info("One example of a POLYGON WKT string under EPSG-5070: \n{}".format(grids_filtered['geometry'].iloc[0]))
     
     if output_path:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)  # Create directory if it doesn't exist
