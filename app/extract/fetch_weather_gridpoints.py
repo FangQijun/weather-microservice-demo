@@ -150,7 +150,7 @@ def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, bat
                 logger.info(json_string)
             
             if i % batch_size == batch_size - 1:
-                sleep_duration = random.uniform(5, 10)
+                sleep_duration = random.uniform(5, 8)
                 logger.info(f"zzz... Sleeping for {sleep_duration:.2f} seconds to avoid hitting rate limits")
                 sleep(sleep_duration)  # Sleep to avoid hitting rate limits, albeit the rate limit of NWS API is not public information
         except requests.exceptions.RequestException as e:
@@ -184,6 +184,6 @@ if __name__ == "__main__":
     fetch_weather_points(
         shapefile_path=shapefile_path,
         output_path=output_path,
-        batch_size=50,
+        batch_size=200,
         verbose=False
     )
