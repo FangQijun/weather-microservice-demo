@@ -1,0 +1,19 @@
+[project]
+name = "etl-deps"
+version = "1.0.0"
+description = "Dependencies of an ETL microservice that collects, transforms, and ingests weather data from an API"
+authors = [
+    {name = "FangQijun",email = "7221043+FangQijun@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = "^3.13.2"
+dependencies = [
+    "pygris (>=0.2.0,<0.3.0)",
+    "geopandas (>=1.0.1,<2.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

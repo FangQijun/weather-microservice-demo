@@ -1,3 +1,14 @@
+# Ignore everything in data and logs directories
+data/gridpoints_file/*
+data/shapefile/*
+logs/extract/*
+
+# But keep the .gitkeep files
+!data/.gitkeep
+!data/gridpoints_file/.gitkeep
+!data/shapefile/.gitkeep
+!logs/extract/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
