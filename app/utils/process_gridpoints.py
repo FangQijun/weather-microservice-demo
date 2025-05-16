@@ -4,7 +4,6 @@ Utilities for Gridpoints data parsing and validation.
 import os
 import sys
 import csv
-import logging
 from typing import Dict, List, Any, Optional
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))

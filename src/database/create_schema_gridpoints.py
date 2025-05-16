@@ -4,7 +4,6 @@ Defines tables, hypertables, and indexes.
 """
 import os
 import sys
-import logging
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(project_root)
