@@ -3,105 +3,110 @@ A microservice for weather API data ETL
 
 ## Replay
 ### Local TimescaleDB Setup
-1. On macOS, run the following **globally** installations:
-   1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
-   
-   2. Use `brew` to install PostgreSQL 16.x (The highest version compatible with TimescaleDB). Download TimescaleDB from GitHub. Then build and install it with `make`
-   ```zsh
-   brew update
-   brew install postgresql@16
-   brew install cmake
-   git clone https://github.com/timescale/timescaledb.git
-   cd timescaledb
-   git checkout $(git tag -l | grep -v '\-' | sort -V | tail -1)  # Get the latest stable release
-   ```
+On macOS, run the following **globally** installations:
+1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
 
-   3. Get the output of `find /opt/homebrew -name pg_config` to locate the `pg_config` file path such as `/opt/homebrew/Cellar/postgresql@16/16.5/bin/pg_config`. Temporarily add it to your `$PATH` and by running `export PATH="/opt/homebrew/opt/postgresql@16.9/bin:$PATH"`
-   
-   4. Build and install `TimescaleDB`.
-   ```zsh
-   ./bootstrap
-   cd ./build && make
-   make install
-   ```
+2. Use `brew` to install PostgreSQL 16.x (The highest version compatible with TimescaleDB). Download TimescaleDB from GitHub. Then build and install it with `make`
+```zsh
+brew update
+brew install postgresql@16
+brew install cmake
+git clone https://github.com/timescale/timescaledb.git
+cd timescaledb
+git checkout $(git tag -l | grep -v '\-' | sort -V | tail -1)  # Get the latest stable release
+```
 
-   5. Run `ls -la $(brew --prefix postgresql@16)/share/postgresql@16/extension/timescaledb*`. You should be able to see `timescaledb.control` and some `.sql` files, indicating the `TimescaleDB` extension has been installed correctly.
-   
-   6. Find where the config file is by running `find $(brew --prefix)/var -name "postgresql.conf"`. In my case it was `/opt/homebrew/var/postgresql@16/postgresql.conf`.
+3. Get the output of `find /opt/homebrew -name pg_config` to locate the `pg_config` file path such as `/opt/homebrew/Cellar/postgresql@16/16.5/bin/pg_config`. Temporarily add it to your `$PATH` and by running `export PATH="/opt/homebrew/opt/postgresql@16.9/bin:$PATH"`
 
-   7. Run `nano $(brew --prefix postgresql@16)/var/postgresql@16/postgresql.conf` to make sure there is a line saying `shared_preload_libraries = 'timescaledb'`. If not, edit the value of `shared_preload_libraries` parameter to `'timescaledb'`.
+4. Build and install `TimescaleDB`.
+```zsh
+./bootstrap
+cd ./build && make
+make install
+```
 
-   8. Restart PostgreSQL and ensure it's running.
-   ```zsh
-   brew services restart postgresql@16
-   brew services list  # Confirm it’s running
-   pg_ctl -D /opt/homebrew/var/postgresql@16 status  # Confirm it’s running again, with PID this time
-   ```
+5. Run `ls -la $(brew --prefix postgresql@16)/share/postgresql@16/extension/timescaledb*`. You should be able to see `timescaledb.control` and some `.sql` files, indicating the `TimescaleDB` extension has been installed correctly.
 
-   9. Configure language and region of PostgreSQL DB, and start PostgreSQL service one more time
-   ```zsh
-   initdb /opt/homebrew/var/postgresql@16 -E utf8  # The database cluster will be initialized with locale "en_US.UTF-8". The default text search configuration will be set to "english".
-   ```
+6. Find where the config file is by running `find $(brew --prefix)/var -name "postgresql.conf"`. In my case it was `/opt/homebrew/var/postgresql@16/postgresql.conf`.
 
-   10. Now, you're ready to spin up a TimescaleDB of your own.
-   ```zsh
-   psql postgres  # Enter psql
-   CREATE DATABASE weather_db;  # Create your PostgreSQL database
-   \c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
-   CREATE EXTENSION IF NOT EXISTS timescaledb;  # If output says "CREATE EXTENSION", it's a success!
-   ```
+7. Run `nano $(brew --prefix postgresql@16)/var/postgresql@16/postgresql.conf` to make sure there is a line saying `shared_preload_libraries = 'timescaledb'`. If not, edit the value of `shared_preload_libraries` parameter to `'timescaledb'`.
 
-   11. Test existence of TimescaleDB extension.
-   ```zsh
-   SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';
-      extname   | extversion
-   -------------+------------
-    timescaledb | 2.21.0-dev
-   (1 row)
-   ```
+8. Restart PostgreSQL and ensure it's running.
+```zsh
+brew services restart postgresql@16
+brew services list  # Confirm it’s running
+pg_ctl -D /opt/homebrew/var/postgresql@16 status  # Confirm it’s running again, with PID this time
+```
 
-   12. Now, let's install PostGIS. Check where your `postgresql@16` is installed with `cd ~ && brew list postgresql@16`. You shoud see something saying `/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config`. We will use this in Step 14.
+9. Configure language and region of PostgreSQL DB, and start PostgreSQL service one more time
+```zsh
+initdb /opt/homebrew/var/postgresql@16 -E utf8  # The database cluster will be initialized with locale "en_US.UTF-8". The default text search configuration will be set to "english".
+```
 
-   13. Create an symbolic link of `postgresql@16`.
-   ```zsh
-   sudo ln -s /opt/homebrew/Cellar/postgresql@16/16.9/bin/postgres /usr/local/bin/postgres
-   ```
+10. Now, you're ready to spin up a TimescaleDB of your own.
+```zsh
+psql postgres  # Enter psql
+CREATE DATABASE weather_db;  # Create your PostgreSQL database
+\c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
+CREATE EXTENSION IF NOT EXISTS timescaledb;  # If output says "CREATE EXTENSION", it's a success!
+```
 
-   14. Download a version of PostGIS known to be compatible with `postgresql@16`. Use `cmake` to build and install it.
-   ```zsh
-   cd~ && rm -rf postgis
-   curl -L https://download.osgeo.org/postgis/source/postgis-3.4.2.tar.gz -o postgis.tar.gz
-   tar -xzf postgis.tar.gz
-   cd postgis-3.4.2
-   ./configure --with-pgconfig=/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config  # Or whatever output from Step 12
-   make
-   make install
-   ```
+11. Test existence of TimescaleDB extension.
+```zsh
+SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';
+   extname   | extversion
+-------------+------------
+   timescaledb | 2.21.0-dev
+(1 row)
+```
 
-   15. Verify PostGIS compatible with `postgresql@16` was installed successfully with `find /opt/homebrew -name postgis.control | grep postgresql@16`. You should get something like `/opt/homebrew/Cellar/postgresql@16/16.9/share/postgresql@16/extension/postgis.control`.
+12. Now, let's install PostGIS. Check where your `postgresql@16` is installed with `cd ~ && brew list postgresql@16`. You shoud see something saying `/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config`. We will use this in Step 14.
 
-   16. Now, PostGIS extension is ready in PostgreSQL.
-   ```zsh
-   psql postgres  # Enter psql
-   \c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
-   CREATE EXTENSION IF NOT EXISTS postgis;  # If output says "CREATE EXTENSION", it's a success!
-   ```
+13. Create an symbolic link of `postgresql@16`.
+```zsh
+sudo ln -s /opt/homebrew/Cellar/postgresql@16/16.9/bin/postgres /usr/local/bin/postgres
+```
 
-   17. Test existence of PostGIS extension.
-   ```zsh
-   SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
-    extname | extversion
-   ---------+------------
-    postgis | 3.4.2
-   (1 row)
-   ```
+14. Download a version of PostGIS known to be compatible with `postgresql@16`. Use `cmake` to build and install it.
+```zsh
+cd~ && rm -rf postgis
+curl -L https://download.osgeo.org/postgis/source/postgis-3.4.2.tar.gz -o postgis.tar.gz
+tar -xzf postgis.tar.gz
+cd postgis-3.4.2
+./configure --with-pgconfig=/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config  # Or whatever output from Step 12
+make
+make install
+```
+
+15. Verify PostGIS compatible with `postgresql@16` was installed successfully with `find /opt/homebrew -name postgis.control | grep postgresql@16`. You should get something like `/opt/homebrew/Cellar/postgresql@16/16.9/share/postgresql@16/extension/postgis.control`.
+
+16. Now, PostGIS extension is ready in PostgreSQL.
+```zsh
+psql postgres  # Enter psql
+\c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
+CREATE EXTENSION IF NOT EXISTS postgis;  # If output says "CREATE EXTENSION", it's a success!
+```
+
+17. Test existence of PostGIS extension.
+```zsh
+SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
+   extname | extversion
+---------+------------
+   postgis | 3.4.2
+(1 row)
+```
 
 ### Create a database connection module
-   1. To test the Timescale DB connection from a module
-   ```zsh
-   python src/database/timescale_db_connection.py
-   ```
+To test the Timescale DB connection from a module
+```zsh
+python src/database/timescale_db_connection.py
+```
+
 ### Define the schema for the gridpoints table
+```zsh
+python src/database/create_schema_gridpoints.py
+```
+
 ### Create a loader script to read and import the TSV data
 ### Add some utility functions for data validation
 
