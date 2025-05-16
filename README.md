@@ -51,14 +51,51 @@ A microservice for weather API data ETL
    CREATE EXTENSION IF NOT EXISTS timescaledb;  # If output says "CREATE EXTENSION", it's a success!
    ```
 
-   11. Test connection to Timescale DB.
+   11. Test existence of TimescaleDB extension.
    ```zsh
    SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';
       extname   | extversion
    -------------+------------
-   timescaledb | 2.21.0-dev
+    timescaledb | 2.21.0-dev
    (1 row)
    ```
+
+   12. Now, let's install PostGIS. Check where your `postgresql@16` is installed with `cd ~ && brew list postgresql@16`. You shoud see something saying `/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config`. We will use this in Step 14.
+
+   13. Create an symbolic link of `postgresql@16`.
+   ```zsh
+   sudo ln -s /opt/homebrew/Cellar/postgresql@16/16.9/bin/postgres /usr/local/bin/postgres
+   ```
+
+   14. Download a version of PostGIS known to be compatible with `postgresql@16`. Use `cmake` to build and install it.
+   ```zsh
+   cd~ && rm -rf postgis
+   curl -L https://download.osgeo.org/postgis/source/postgis-3.4.2.tar.gz -o postgis.tar.gz
+   tar -xzf postgis.tar.gz
+   cd postgis-3.4.2
+   ./configure --with-pgconfig=/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config  # Or whatever output from Step 12
+   make
+   make install
+   ```
+
+   15. Verify PostGIS compatible with `postgresql@16` was installed successfully with `find /opt/homebrew -name postgis.control | grep postgresql@16`. You should get something like `/opt/homebrew/Cellar/postgresql@16/16.9/share/postgresql@16/extension/postgis.control`.
+
+   16. Now, PostGIS extension is ready in PostgreSQL.
+   ```zsh
+   psql postgres  # Enter psql
+   \c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
+   CREATE EXTENSION IF NOT EXISTS postgis;  # If output says "CREATE EXTENSION", it's a success!
+   ```
+
+   17. Test existence of PostGIS extension.
+   ```zsh
+   SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
+    extname | extversion
+   ---------+------------
+    postgis | 3.4.2
+   (1 row)
+   ```
+
 ### Create a database connection module
    1. To test the Timescale DB connection from a module
    ```zsh

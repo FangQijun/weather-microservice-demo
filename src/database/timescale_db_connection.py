@@ -15,7 +15,11 @@ sys.path.append(project_root)
 from app.utils.log_config import setup_logging
 
 
-logger = setup_logging(logs_dir="logs", logs_sub_dir="extract", module_name="timescale_db_connection")
+logger = setup_logging(
+    logs_dir="logs",
+    logs_sub_dir="database",
+    module_name=os.path.splitext(os.path.basename(__file__))[0]
+)
 
 
 # Database configuration - can be moved to environment variables or config file

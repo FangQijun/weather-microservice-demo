@@ -7,7 +7,11 @@ sys.path.append(project_root)
 from app.utils.log_config import setup_logging
 
 
-logger = setup_logging(logs_dir="logs", logs_sub_dir="extract", module_name="test_ts_db_conn")
+logger = setup_logging(
+    logs_dir="logs",
+    logs_sub_dir="extract",
+    module_name="test_ts_db_conn"
+)
 
 
 def main():
