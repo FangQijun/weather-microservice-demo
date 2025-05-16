@@ -10,6 +10,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(project_root)
 from app.utils.log_config import setup_logging
 from src.database.timescale_db_connection import get_db_cursor
+from src.utils.check_table_exists import check_table_exists
 
 
 logger = setup_logging(
@@ -78,8 +79,12 @@ def initialize_schema():
             for index_sql in CREATE_GRIDPOINTS_INDEXES:
                 cursor.execute(index_sql)
             logger.info("Gridpoints indexes created or already exist")
-            
-        logger.info("Schema initialization completed successfully")
+        if check_table_exists(table_name="gridpoints"):
+            logger.info("Gridpoints table exists and is ready for use")
+            logger.info("Schema initialization completed successfully")
+        else:
+            logger.warning("Gridpoints table does NOT exist after initialization")
+            return False
         return True
     except Exception as e:
         logger.error(f"Schema initialization failed: {str(e)}")
