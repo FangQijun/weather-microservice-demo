@@ -6,7 +6,7 @@ import os
 import sys
 import psycopg2
 from dotenv import load_dotenv
-from typing import Optional
+from typing import Optional, Generator
 from psycopg2.extensions import connection
 from contextlib import contextmanager
 
@@ -49,7 +49,7 @@ def get_connection() -> connection:
 
 
 @contextmanager
-def get_db_cursor(commit: bool = False) -> None:
+def get_db_cursor(commit: bool = False) -> Generator:
     """
     Context manager for database operations.
     
@@ -105,13 +105,19 @@ def test_connection() -> bool:
             logger.info(f"Available extensions: {', '.join([ext[0] for ext in extensions])}")
             
             # Check specifically for TimescaleDB extension
-            cursor.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
             cursor.execute("SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';")
             timescale = cursor.fetchone()
             if timescale:
                 logger.info(f"TimescaleDB extension found: version {timescale[1]}")
             else:
-                logger.error(f"Failed to create TimescaleDB extension: {str(ext_err)}")
+                logger.warning("TimescaleDB extension not found in current database!")
+                logger.info("Attempting to create TimescaleDB extension...")
+                try:
+                    with get_db_cursor(commit=True) as create_cursor:
+                        create_cursor.execute("CREATE EXTENSION IF NOT EXISTS timescaledb;")
+                    logger.info("Successfully created TimescaleDB extension")
+                except Exception as ext_err:
+                    logger.error(f"Failed to create TimescaleDB extension: {str(ext_err)}")
                 
         return True
     except Exception as e:
