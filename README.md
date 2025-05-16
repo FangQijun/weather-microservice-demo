@@ -47,7 +47,7 @@ A microservice for weather API data ETL
    ```zsh
    psql postgres  # Enter psql
    CREATE DATABASE weather_db;  # Create your PostgreSQL database
-   \c weather_db  # You are now connected to database "weather_db" as user "qijunfang".
+   \c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
    CREATE EXTENSION IF NOT EXISTS timescaledb;  # If output says "CREATE EXTENSION", it's a success!
    ```
 
@@ -59,6 +59,14 @@ A microservice for weather API data ETL
    timescaledb | 2.21.0-dev
    (1 row)
    ```
+### Create a database connection module
+   1. To test the Timescale DB connection from a module
+   ```zsh
+   python src/database/timescale_db_connection.py
+   ```
+### Define the schema for the gridpoints table
+### Create a loader script to read and import the TSV data
+### Add some utility functions for data validation
 
 
 ## Thought Processes
