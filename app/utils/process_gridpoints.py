@@ -4,6 +4,8 @@ Utilities for Gridpoints data parsing and validation.
 import os
 import sys
 import csv
+import re
+from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -16,6 +18,51 @@ logger = setup_logging(
     logs_sub_dir="extract",
     module_name=os.path.splitext(os.path.basename(__file__))[0]
 )
+
+
+def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[str]:
+    """
+    Find the most recent file with the specified extension in a given subfolder of data.
+    Assumes filenames end with a timestamp in format YYYYMMDDTHHMMSS.
+    
+    Args:
+        sub_folder (str): The subfolder within the data directory to search
+        extension (str): The file extension to filter by (default: '.tsv')
+        
+    Returns:
+        Optional[str]: Full path to the most recent file, or None if no matching files found
+    """
+    project_root = Path(__file__).parent.parent.parent.parent  # From app/utils to project root
+    dir_path = project_root / 'data' / sub_folder
+    
+    if not dir_path.exists() or not dir_path.is_dir():
+        logger.error(f"Directory not found: {dir_path}")
+        return None
+    
+    timestamp_pattern = re.compile(r'(\d{8}T\d{6})')
+    files_with_timestamps = []
+    
+    for file_name in os.listdir(dir_path):
+        if not file_name.endswith(extension):
+            continue
+        
+        match = timestamp_pattern.search(file_name)
+        if match:
+            timestamp = match.group(1)  # Extract timestamp substrings from filename
+            file_path = dir_path / file_name
+            files_with_timestamps.append((file_path, timestamp))
+        else:
+            logger.debug(f"File {file_name} doesn't contain a timestamp in expected format")
+    
+    if not files_with_timestamps:
+        logger.warning(f"No {extension} files with timestamps found in {dir_path}")
+        return None
+    
+    # Filename with the greatest timestamp
+    most_recent_file = sorted(files_with_timestamps, key=lambda x: x[1], reverse=True)[0][0]
+    logger.info(f"Found most recent file: {most_recent_file}")
+    
+    return str(most_recent_file)
 
 
 def parse_tsv_file(file_path: str, num_rows: int) -> List[Dict[str, Any]]:
