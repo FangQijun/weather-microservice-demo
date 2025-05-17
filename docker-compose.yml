@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Your weather microservice application
+  app:
+    build: .
+    container_name: weather-microservice
+    depends_on:
+      - timescaledb
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_NAME=weather_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - weather-network
+
+  # TimescaleDB service
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescale-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=weather_db
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - weather-network
+
+networks:
+  weather-network:
+    driver: bridge
+
+volumes:
+  timescaledb-data:

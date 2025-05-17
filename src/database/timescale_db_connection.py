@@ -6,13 +6,14 @@ import os
 import sys
 import psycopg2
 from dotenv import load_dotenv
-from typing import Optional, Generator
+from typing import Generator
 from psycopg2.extensions import connection
 from contextlib import contextmanager
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(project_root)
 from app.utils.log_config import setup_logging
+from src.config.db_config import DB_CONFIG
 
 
 logger = setup_logging(
@@ -22,15 +23,15 @@ logger = setup_logging(
 )
 
 
-# Database configuration - can be moved to environment variables or config file
-load_dotenv()
-DB_CONFIG = {
-    "dbname": os.environ.get("DB_NAME"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD", ""),  # Default empty for local development
-    "host": os.environ.get("DB_HOST", "localhost"),
-    "port": os.environ.get("DB_PORT", "5432")
-}
+# Local database configuration
+# load_dotenv()
+# DB_CONFIG = {
+#     "dbname": os.environ.get("DB_NAME"),
+#     "user": os.environ.get("DB_USER"),
+#     "password": os.environ.get("DB_PASSWORD", ""),  # Default empty for local development
+#     "host": os.environ.get("DB_HOST", "localhost"),
+#     "port": os.environ.get("DB_PORT", "5432")
+# }
 
 
 def get_connection() -> connection:
@@ -44,7 +45,14 @@ def get_connection() -> connection:
         Exception: If connection fails
     """
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
+        # conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg2.connect(
+            host=DB_CONFIG["host"],
+            port=DB_CONFIG["port"],
+            database=DB_CONFIG["database"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"]
+        )
         logger.info(f"Successfully connected to database {DB_CONFIG['dbname']}")
         return conn
     except Exception as e:
