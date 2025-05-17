@@ -107,8 +107,20 @@ python src/database/timescale_db_connection.py
 python src/database/create_schema_gridpoints.py
 ```
 
-### Create a loader script to read and import the TSV data
-### Add some utility functions for data validation
+### Import data in the TSV file into the gridpoints table
+The app automatically finds the latest `.tsv` file (the greatest timestamp suffix) inside dir `./data/gridpoints_file` for ingestion. 
+To overwrite to table `gridpoints` with the entire TSV file (~1.26 million records), 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000
+```
+To overwrite to table `gridpoints` with the first 50,000 records of the TSV file, 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000 --num_rows 50000
+```
+To **append** to table `gridpoints` with the first 30,000 records of the TSV file, 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
+```
 
 
 ## Thought Processes
