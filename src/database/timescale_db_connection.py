@@ -24,14 +24,14 @@ logger = setup_logging(
 
 
 # Local database configuration
-# load_dotenv()
-# DB_CONFIG = {
-#     "dbname": os.environ.get("DB_NAME"),
-#     "user": os.environ.get("DB_USER"),
-#     "password": os.environ.get("DB_PASSWORD", ""),  # Default empty for local development
-#     "host": os.environ.get("DB_HOST", "localhost"),
-#     "port": os.environ.get("DB_PORT", "5432")
-# }
+load_dotenv()
+DB_CONFIG = {
+    "dbname": os.environ.get("DB_NAME"),
+    "user": os.environ.get("DB_USER"),
+    "password": os.environ.get("DB_PASSWORD", ""),  # Default empty for local development
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "port": os.environ.get("DB_PORT", "5432")
+}
 
 
 def get_connection() -> connection:
@@ -45,14 +45,14 @@ def get_connection() -> connection:
         Exception: If connection fails
     """
     try:
-        # conn = psycopg2.connect(**DB_CONFIG)
-        conn = psycopg2.connect(
-            host=DB_CONFIG["host"],
-            port=DB_CONFIG["port"],
-            database=DB_CONFIG["database"],
-            user=DB_CONFIG["user"],
-            password=DB_CONFIG["password"]
-        )
+        conn = psycopg2.connect(**DB_CONFIG)
+        # conn = psycopg2.connect(
+        #     host=DB_CONFIG["host"],
+        #     port=DB_CONFIG["port"],
+        #     database=DB_CONFIG["database"],
+        #     user=DB_CONFIG["user"],
+        #     password=DB_CONFIG["password"]
+        # )
         logger.info(f"Successfully connected to database {DB_CONFIG['dbname']}")
         return conn
     except Exception as e:

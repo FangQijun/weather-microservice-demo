@@ -1,24 +1,4 @@
 services:
-  # Your weather microservice application
-  app:
-    build: .
-    container_name: weather-microservice
-    depends_on:
-      - timescaledb
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=timescaledb
-      - DB_PORT=5432
-      - DB_NAME=weather_db
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-    networks:
-      - weather-network
-
   # TimescaleDB service
   timescaledb:
     image: timescale/timescaledb-ha:pg16
@@ -32,6 +12,32 @@ services:
     volumes:
       - timescaledb-data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - weather-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Your weather microservice application
+  app:
+    build: .
+    container_name: weather-microservice
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_NAME=weather_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
     networks:
       - weather-network
 
