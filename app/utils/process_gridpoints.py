@@ -5,7 +5,6 @@ import os
 import sys
 import csv
 import re
-from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -32,10 +31,10 @@ def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[s
     Returns:
         Optional[str]: Full path to the most recent file, or None if no matching files found
     """
-    project_root = Path(__file__).parent.parent.parent.parent  # From app/utils to project root
-    dir_path = project_root / 'data' / sub_folder
+    dir_path = os.path.join(project_root, 'data', sub_folder)
+    logger.info(f"Searching for files in: {dir_path}")
     
-    if not dir_path.exists() or not dir_path.is_dir():
+    if not os.path.isdir(dir_path):
         logger.error(f"Directory not found: {dir_path}")
         return None
     
@@ -49,7 +48,7 @@ def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[s
         match = timestamp_pattern.search(file_name)
         if match:
             timestamp = match.group(1)  # Extract timestamp substrings from filename
-            file_path = dir_path / file_name
+            file_path = os.path.join(dir_path, file_name)
             files_with_timestamps.append((file_path, timestamp))
         else:
             logger.debug(f"File {file_name} doesn't contain a timestamp in expected format")
