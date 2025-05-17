@@ -70,15 +70,27 @@ def parse_tsv_file(file_path: str, num_rows: int) -> List[Dict[str, Any]]:
     
     Args:
         file_path (str): Path to the TSV file
-        num_rows (int): Number of rows to read from the file
+        num_rows (Optional[int], optional): Number of rows to read from the file. 
+                                           If None, all rows are read. Defaults to None.
         
     Returns:
-        List[Dict[str, Any]]: List of dictionaries with column names as keys
+        List[Dict[str, str]]: List of dictionaries with column names as keys
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f, delimiter='\t')
-            data = list(reader)
+            
+            if num_rows is not None:
+                # Only read the specified number of rows
+                data = []
+                for i, row in enumerate(reader):
+                    if i >= num_rows:
+                        break
+                    data.append(row)
+            else:
+                # Read all rows
+                data = list(reader)
+            
             logger.info(f"Successfully parsed {len(data)} rows from {file_path}")
             return data
     except Exception as e:
