@@ -2,12 +2,17 @@
 data/gridpoints_file/*
 data/shapefile/*
 logs/extract/*
+logs/extract/*
+logs/load/*
+logs/database/*
 
 # But keep the .gitkeep files
 !data/.gitkeep
 !data/gridpoints_file/.gitkeep
 !data/shapefile/.gitkeep
 !logs/extract/.gitkeep
+!logs/load/.gitkeep
+!logs/database/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

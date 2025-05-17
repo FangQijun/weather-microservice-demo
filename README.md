@@ -1,6 +1,128 @@
 # Weather Microservice Demo
 A microservice for weather API data ETL
 
+## Replay
+### Local TimescaleDB Setup
+On macOS, run the following **globally** installations:
+1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
+
+2. Use `brew` to install PostgreSQL 16.x (The highest version compatible with TimescaleDB). Download TimescaleDB from GitHub. Then build and install it with `make`
+```zsh
+brew update
+brew install postgresql@16
+brew install cmake
+git clone https://github.com/timescale/timescaledb.git
+cd timescaledb
+git checkout $(git tag -l | grep -v '\-' | sort -V | tail -1)  # Get the latest stable release
+```
+
+3. Get the output of `find /opt/homebrew -name pg_config` to locate the `pg_config` file path such as `/opt/homebrew/Cellar/postgresql@16/16.5/bin/pg_config`. Temporarily add it to your `$PATH` and by running `export PATH="/opt/homebrew/opt/postgresql@16.9/bin:$PATH"`
+
+4. Build and install `TimescaleDB`.
+```zsh
+./bootstrap
+cd ./build && make
+make install
+```
+
+5. Run `ls -la $(brew --prefix postgresql@16)/share/postgresql@16/extension/timescaledb*`. You should be able to see `timescaledb.control` and some `.sql` files, indicating the `TimescaleDB` extension has been installed correctly.
+
+6. Find where the config file is by running `find $(brew --prefix)/var -name "postgresql.conf"`. In my case it was `/opt/homebrew/var/postgresql@16/postgresql.conf`.
+
+7. Run `nano $(brew --prefix postgresql@16)/var/postgresql@16/postgresql.conf` to make sure there is a line saying `shared_preload_libraries = 'timescaledb'`. If not, edit the value of `shared_preload_libraries` parameter to `'timescaledb'`.
+
+8. Restart PostgreSQL and ensure it's running.
+```zsh
+brew services restart postgresql@16
+brew services list  # Confirm it’s running
+pg_ctl -D /opt/homebrew/var/postgresql@16 status  # Confirm it’s running again, with PID this time
+```
+
+9. Configure language and region of PostgreSQL DB, and start PostgreSQL service one more time
+```zsh
+initdb /opt/homebrew/var/postgresql@16 -E utf8  # The database cluster will be initialized with locale "en_US.UTF-8". The default text search configuration will be set to "english".
+```
+
+10. Now, you're ready to spin up a TimescaleDB of your own.
+```zsh
+psql postgres  # Enter psql
+CREATE DATABASE weather_db;  # Create your PostgreSQL database
+\c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
+CREATE EXTENSION IF NOT EXISTS timescaledb;  # If output says "CREATE EXTENSION", it's a success!
+```
+
+11. Test existence of TimescaleDB extension.
+```zsh
+SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';
+   extname   | extversion
+-------------+------------
+   timescaledb | 2.21.0-dev
+(1 row)
+```
+
+12. Now, let's install PostGIS. Check where your `postgresql@16` is installed with `cd ~ && brew list postgresql@16`. You shoud see something saying `/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config`. We will use this in Step 14.
+
+13. Create an symbolic link of `postgresql@16`.
+```zsh
+sudo ln -s /opt/homebrew/Cellar/postgresql@16/16.9/bin/postgres /usr/local/bin/postgres
+```
+
+14. Download a version of PostGIS known to be compatible with `postgresql@16`. Use `cmake` to build and install it.
+```zsh
+cd~ && rm -rf postgis
+curl -L https://download.osgeo.org/postgis/source/postgis-3.4.2.tar.gz -o postgis.tar.gz
+tar -xzf postgis.tar.gz
+cd postgis-3.4.2
+./configure --with-pgconfig=/opt/homebrew/Cellar/postgresql@16/16.9/bin/pg_config  # Or whatever output from Step 12
+make
+make install
+```
+
+15. Verify PostGIS compatible with `postgresql@16` was installed successfully with `find /opt/homebrew -name postgis.control | grep postgresql@16`. You should get something like `/opt/homebrew/Cellar/postgresql@16/16.9/share/postgresql@16/extension/postgis.control`.
+
+16. Now, PostGIS extension is ready in PostgreSQL.
+```zsh
+psql postgres  # Enter psql
+\c weather_db  # You are now connected to database "weather_db" as user "[your_mac_username]".
+CREATE EXTENSION IF NOT EXISTS postgis;  # If output says "CREATE EXTENSION", it's a success!
+```
+
+17. Test existence of PostGIS extension.
+```zsh
+SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
+   extname | extversion
+---------+------------
+   postgis | 3.4.2
+(1 row)
+```
+
+### Create a database connection module
+To test the Timescale DB connection from a module
+```zsh
+python src/database/timescale_db_connection.py
+```
+
+### Define the schema for the gridpoints table
+```zsh
+python src/database/create_schema_gridpoints.py
+```
+
+### Import data in the TSV file into the gridpoints table
+The app automatically finds the latest `.tsv` file (the greatest timestamp suffix) inside dir `./data/gridpoints_file` for ingestion. 
+To overwrite to table `gridpoints` with the entire TSV file (~1.26 million records), 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000
+```
+To overwrite to table `gridpoints` with the first 50,000 records of the TSV file, 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000 --num_rows 50000
+```
+To **append** to table `gridpoints` with the first 30,000 records of the TSV file, 1000 records per batch.
+```zsh
+python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
+```
+
+
 ## Thought Processes
 1. It is a 2-step process to get the weather forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
    1. Step 1 is to inquire which [Gridpoint](https://weather-gov.github.io/api/gridpoints) (a 2.5km x 2.5km rectangle on the map of the United States represented by an office code consisting of 3 capital letters and two integers) a specific lat/lon is located in with a payload looking like `https://api.weather.gov/points/{latitude},{longitude}`

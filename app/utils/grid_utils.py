@@ -7,7 +7,11 @@ from shapely.geometry import Polygon
 from log_config import setup_logging
 
 
-logger = setup_logging(logs_dir="logs", logs_sub_dir="extract", module_name="grid_utils")
+logger = setup_logging(
+    logs_dir="logs",
+    logs_sub_dir="extract",
+    module_name=os.path.splitext(os.path.basename(__file__))[0]
+)
 pd.set_option('display.max_columns', None)
 
 
