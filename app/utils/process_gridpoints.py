@@ -64,7 +64,7 @@ def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[s
     return str(most_recent_file)
 
 
-def parse_tsv_file(file_path: str, num_rows: int) -> List[Dict[str, Any]]:
+def parse_tsv_file(file_path: str, num_rows: Optional[int] = None) -> List[Dict[str, Any]]:
     """
     Parse a TSV file into a list of dictionaries.
     
