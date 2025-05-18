@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS gridpoints (
     api_call_id TEXT,
     centroid_lon DOUBLE PRECISION NOT NULL,
     centroid_lat DOUBLE PRECISION NOT NULL,
+    centroid_point GEOMETRY(POINT, 4326),
+    centroid_srid GEOMETRY,
+    geog GEOGRAPHY(POINT),
     grid_id TEXT NOT NULL,
     grid_x INTEGER NOT NULL,
     grid_y INTEGER NOT NULL,
@@ -42,19 +45,14 @@ CREATE TABLE IF NOT EXISTS gridpoints (
 
 # Add PostGIS extension and geography column
 CREATE_POSTGIS_EXTENSION = "CREATE EXTENSION IF NOT EXISTS postgis;"
-ADD_GEOGRAPHY_COLUMN = """
-ALTER TABLE gridpoints 
-ADD COLUMN IF NOT EXISTS geog GEOGRAPHY(POINT);
-UPDATE gridpoints SET geog = ST_SetSRID(ST_MakePoint(centroid_lon, centroid_lat), 4326)::geography
-WHERE geog IS NULL;
-"""
 
 # Index for the common query patterns
 CREATE_GRIDPOINTS_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_gridpoints_grid_id ON gridpoints (grid_id);",
     "CREATE INDEX IF NOT EXISTS idx_gridpoints_grid_xy ON gridpoints (grid_id, grid_x, grid_y);",
-    "CREATE INDEX IF NOT EXISTS idx_gridpoints_coords ON gridpoints (centroid_lat, centroid_lon);"
-    "CREATE INDEX IF NOT EXISTS idx_gridpoints_geog ON gridpoints USING GIST(geog);"
+    "CREATE INDEX IF NOT EXISTS idx_gridpoints_coords ON gridpoints (centroid_lat, centroid_lon);",
+    "CREATE INDEX IF NOT EXISTS idx_gridpoints_geog ON gridpoints USING GIST(geog);",
+    "CREATE INDEX IF NOT EXISTS idx_gridpoints_centroid_point ON gridpoints USING GIST(centroid_point);"
 ]
 
 
@@ -65,14 +63,13 @@ def initialize_schema():
     """
     try:
         with get_db_cursor(commit=True) as cursor:
+            # Enable PostGIS, then create gridpoints table
+            cursor.execute(CREATE_POSTGIS_EXTENSION)
+            logger.info("PostGIS extension and geography column added")
+
             # Create gridpoints table
             cursor.execute(CREATE_GRIDPOINTS_TABLE)
             logger.info("Gridpoints table created or already exists")
-            
-            # You can enable these if you decide to use PostGIS
-            cursor.execute(CREATE_POSTGIS_EXTENSION)
-            cursor.execute(ADD_GEOGRAPHY_COLUMN)
-            logger.info("PostGIS extension and geography column added")
             
             # Create indexes
             for index_sql in CREATE_GRIDPOINTS_INDEXES:

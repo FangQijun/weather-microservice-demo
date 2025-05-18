@@ -38,14 +38,22 @@ def insert_gridpoints(gridpoints: List[Dict[str, Any]], batch_size: int = 1000) 
     successful_inserts = 0
     
     # SQL for inserting a gridpoint
-    insert_sql = """
+    INSERT_VALUES_TO_TABLE = """
     INSERT INTO gridpoints (
-        api_call_id, centroid_lon, centroid_lat, grid_id, grid_x, grid_y,
+        api_call_id, centroid_lon, centroid_lat, centroid_point, centroid_srid, geog,
+        grid_id, grid_x, grid_y,
         forecast_url, forecast_hourly_url, forecast_office_url, forecast_grid_data_url,
         observation_stations_url, forecast_zone_url, time_zone, radar_station
     ) VALUES (
-        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
     )
+    """
+
+    ADD_GEOGRAPHY_AND_GEOMETRY_COLUMNS = """
+    UPDATE gridpoints 
+    SET centroid_point = ST_MakePoint(centroid_lon, centroid_lat),
+        centroid_srid = ST_SetSRID(ST_MakePoint(centroid_lon, centroid_lat), 4326),
+        geog = ST_SetSRID(ST_MakePoint(centroid_lon, centroid_lat), 4326)::geography;
     """
     
     try:
@@ -60,6 +68,9 @@ def insert_gridpoints(gridpoints: List[Dict[str, Any]], batch_size: int = 1000) 
                         gp['api_call_id'], 
                         gp['centroid_lon'], 
                         gp['centroid_lat'],
+                        None,  # centroid_point is not used in the insert
+                        None,  # centroid_srid is not used in the insert
+                        None,  # geog is not used in the insert
                         gp['grid_id'], 
                         gp['grid_x'], 
                         gp['grid_y'],
@@ -75,7 +86,10 @@ def insert_gridpoints(gridpoints: List[Dict[str, Any]], batch_size: int = 1000) 
                     for gp in batch
                 ]
                 
-                cursor.executemany(insert_sql, batch_data)
+                cursor.executemany(INSERT_VALUES_TO_TABLE, batch_data)
+            
+                # Add geography and geometry columns
+                cursor.execute(ADD_GEOGRAPHY_AND_GEOMETRY_COLUMNS)
                 
                 # Update counters
                 successful_inserts += len(batch)
