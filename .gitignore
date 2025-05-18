@@ -1,6 +1,8 @@
 # Ignore everything in data and logs directories
 data/gridpoints_file/*
 data/shapefile/*
+data/forecast_daily/*
+data/forecast_hourly/*
 logs/extract/*
 logs/extract/*
 logs/load/*
@@ -10,6 +12,8 @@ logs/database/*
 !data/.gitkeep
 !data/gridpoints_file/.gitkeep
 !data/shapefile/.gitkeep
+!data/forecast_daily/.gitkeep
+!data/forecast_hourly/.gitkeep
 !logs/extract/.gitkeep
 !logs/load/.gitkeep
 !logs/database/.gitkeep
