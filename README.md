@@ -191,6 +191,6 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
    3. If you are a real geography nerd, check [this](https://gis.stackexchange.com/questions/378716/understanding-epsg-in-wkt) out.
 8. Web tool to [stitch images](https://pinetools.com/merge-images).
 9. Web tool to [show file differences](https://www.diffchecker.com/text-compare/).
-10. Pros and cons of PostGIS geography and geometry types: [GEOGRAPHY vs GEOMETRY](https://gis.stackexchange.com/questions/6681/pros-and-cons-of-postgis-geography-and-geometry-types).
+10. Pros and cons of PostGIS GEOGRAPHY and GEOMETRY types: [GEOGRAPHY vs GEOMETRY](https://gis.stackexchange.com/questions/6681/pros-and-cons-of-postgis-geography-and-geometry-types).
 
 ## Ambitions / Improvement Opportunities
