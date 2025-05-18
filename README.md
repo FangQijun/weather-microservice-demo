@@ -14,7 +14,7 @@ A microservice for weather API data ETL
    git clone https://github.com/FangQijun/weather-microservice-demo.git
    cd weather-microservice-demo
    ```
-3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API ke, of which you'd ne making API calls on behalf:
+3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API key, of which you'd ne making API calls on behalf:
    ```zsh
    UA-DOMAIN=[Your_Organization].com
    UA-EMAIL=[Your_Name]@[Your_Organization].com
@@ -182,13 +182,14 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
 1. [National Weather Service API](https://www.weather.gov/documentation/services-web-api)
 2. National Weather Service API [forecast update schedule](https://www.weather.gov/gid/nwr_general), hourly weather forecasts are updated every hour approximately 5 minutes after the top of the hour.
 3. [U.S. States coordinate polygon data](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2024&layergroup=States+%28and+equivalent%29) from U.S. Census.
-4. [pygris](https://walker-data.com/pygris/), a Python package to help users access US Census Bureau TIGER/Line and cartographic boundary shapefiles and load them into Python as GeoDataFrames.
-5. [Google Earth Pro](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize `.shp` files downloaded or you created yourself.
-6. Web tool to [visualize WKT strings](https://wktmap.com/) of Geo-objects under various EPSG versions (namely, Coordinate Reference Systems (CRSs)). For example the two systems involved in the app are:
+4. Latest Docker image of Timescale DB [[1](https://hub.docker.com/r/timescale/timescaledb-ha), [2](https://github.com/timescale/timescaledb-docker-ha/)].
+5. [pygris](https://walker-data.com/pygris/), a Python package to help users access US Census Bureau TIGER/Line and cartographic boundary shapefiles and load them into Python as GeoDataFrames.
+6. [Google Earth Pro](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize `.shp` files downloaded or you created yourself.
+7. Web tool to [visualize WKT strings](https://wktmap.com/) of Geo-objects under various EPSG versions (namely, Coordinate Reference Systems (CRSs)). For example the two systems involved in the app are:
    1. EPSG:4326, also known as WGS 84, is a geodetic coordinate system representing latitude and longitude on the surface of the Earth.
    2. EPSG:5070 is a projected coordinate system, specifically the Albers Equal Area Conic projection for the contiguous United States, using the NAD 1983 datum.
    3. If you are a real geography nerd, check [this](https://gis.stackexchange.com/questions/378716/understanding-epsg-in-wkt) out.
-7. Web tool to [stitch images](https://pinetools.com/merge-images).
-8. Web tool to [show file differences](https://www.diffchecker.com/text-compare/).
+8. Web tool to [stitch images](https://pinetools.com/merge-images).
+9. Web tool to [show file differences](https://www.diffchecker.com/text-compare/).
 
 ## Ambitions / Improvement Opportunities
