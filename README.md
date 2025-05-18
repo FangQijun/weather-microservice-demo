@@ -14,10 +14,12 @@ A microservice for weather API data ETL
    git clone https://github.com/FangQijun/weather-microservice-demo.git
    cd weather-microservice-demo
    ```
-3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API key, of which you'd ne making API calls on behalf:
+3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN(-BACKUP)` and `UA-EMAIL(-BACKUP)` serve as substitute to National Weather Service (NWS) API key, of which you'd ne making API calls on behalf. You need two sets of User-Agent parameters just in case NWS API has rate limits on API calls from one single UA.
    ```zsh
    UA-DOMAIN=[Your_Organization].com
    UA-EMAIL=[Your_Name]@[Your_Organization].com
+   UA-DOMAIN-BACKUP=[Your_Backup_Organization].com
+   UA-EMAIL-BACKUP=[Your_Pseudonym]@[Your_Backup_Organization].com
 
    DB_HOST=timescaledb
    DB_PORT=5432
