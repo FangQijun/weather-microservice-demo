@@ -146,5 +146,6 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
    2. EPSG:5070 is a projected coordinate system, specifically the Albers Equal Area Conic projection for the contiguous United States, using the NAD 1983 datum.
    3. If you are a real geography nerd, check [this](https://gis.stackexchange.com/questions/378716/understanding-epsg-in-wkt) out.
 7. Web tool to [stitch images](https://pinetools.com/merge-images).
+8. Web tool to [show file differences](https://www.diffchecker.com/text-compare/).
 
 ## Ambitions / Improvement Opportunities
