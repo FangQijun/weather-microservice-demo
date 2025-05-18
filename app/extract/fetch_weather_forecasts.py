@@ -1,12 +1,10 @@
 import os
 import sys
 import argparse
-import subprocess
 import requests
 import json
 from dotenv import load_dotenv
-from math import radians, cos, sin, asin, sqrt
-from pathlib import Path
+from typing import Dict, Any, Optional, List, Tuple
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,8 +25,18 @@ UA_DOMAIN_BACKUP = os.environ.get("UA-DOMAIN-BACKUP")
 UA_EMAIL_BACKUP = os.environ.get("UA-EMAIL-BACKUP")
 
 
-def find_nearest_gridpoint(longitude, latitude, verbose=False):
-    """Find the nearest gridpoint to the given coordinates"""
+def find_nearest_gridpoint(longitude: float, latitude: float, verbose=False) -> Optional[Dict[str, Any]]:
+    """
+    Find the nearest gridpoint to the given coordinates using PostGIS spatial queries
+    
+    Args:
+        longitude: Longitude coordinate
+        latitude: Latitude coordinate
+        verbose: Whether to log detailed information
+        
+    Returns:
+        Dictionary with gridpoint information or None if not found
+    """
     logger.info(f"Finding nearest gridpoint to coordinates: ({longitude}, {latitude})")
 
     NEAREST_GRIDPOINT = """
@@ -77,13 +85,27 @@ def find_nearest_gridpoint(longitude, latitude, verbose=False):
     return result_dict
 
 
-def fetch_weather_forecast(grid_id, grid_x, grid_y, is_hourly=False, verbose=False):
-    """Fetch weather forecast from NWS API"""
+def fetch_weather_forecast(grid_id: str, grid_x: int, grid_y: int, is_hourly: bool = False, verbose: bool = False):
+    """
+    Fetch weather forecast from NWS API
+    
+    Args:
+        grid_id: Grid ID (office code of weather station)
+        grid_x: Grid X coordinate
+        grid_y: Grid Y coordinate
+        is_hourly: Whether to fetch hourly forecast (True) or daily forecast (False, default)
+        verbose: Whether to log detailed information (False by default)
+        
+    Returns:
+        JSON response or None if request failed
+    """
     base_url = f"https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}/forecast"
     if is_hourly:
         base_url += f"/hourly"
     if verbose:
-        logger.info(f"Fetching hourly forecast from: {base_url}")
+        logger.info(f"Fetching {'hourly' if is_hourly else 'daily'} forecast from: {base_url}...")
+    else:
+        logger.info(f"Fetching {'hourly' if is_hourly else 'daily'} forecast...")
     
     headers = {
         "User-Agent": "({}, {})".format(UA_DOMAIN_BACKUP, UA_EMAIL_BACKUP),
@@ -103,8 +125,18 @@ def fetch_weather_forecast(grid_id, grid_x, grid_y, is_hourly=False, verbose=Fal
         return None
 
 
-def save_forecast_to_file(forecast_data, is_hourly, verbose=False):
-    """Save forecast data to file"""
+def save_forecast_to_file(forecast_data: Dict[str, Any], is_hourly: bool, verbose: bool = False) -> str:
+    """
+    Process forecast data and save as TSV
+    
+    Args:
+        forecast_data: Forecast data from API
+        is_hourly: Whether this is hourly forecast data
+        verbose: Whether to log detailed information
+        
+    Returns:
+        Path to the saved file
+    """
     file_path = os.path.join(
         project_root, 
         "data", 
@@ -118,6 +150,7 @@ def save_forecast_to_file(forecast_data, is_hourly, verbose=False):
     
     if verbose:
         logger.info(f"Saved forecast data to {file_path}")
+    return file_path
 
 
 def main():
