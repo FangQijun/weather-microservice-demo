@@ -2,8 +2,49 @@
 A microservice for weather API data ETL
 
 ## Replay
-### Local TimescaleDB Setup
-On macOS, run the following **globally** installations:
+### Run in a Docker container
+1. Prerequisites
+   - Install Docker and Docker Compose CLIs. Check if you have both CLIs by running `docker --version` and `docker-compose --version`. If not, refer to the [installation instructions](https://docs.docker.com/compose/install/). Also, ensure Docker has sufficient resources allocated (e.g., at least 2 CPUs and 4GB of memory). Adjust these settings in Docker Desktop under menu `Settings > Resources`.
+   - Install Homebrew by running `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` and `brew --version` to verify installation.
+   - (Optional for Local Testing) Install Python `brew install python@3.13` and `python3 --version` to verify installation.
+   - (Optional for Local Testing) Install Poetry `curl -sSL https://install.python-poetry.org | python3 -` and `poetry --version` to verify installation.
+2. Clone the working directory
+   ```zsh
+   git clone https://github.com/FangQijun/weather-microservice-demo.git
+   cd weather-microservice-demo
+   ```
+3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API ke, of which you'd ne making API calls on behalf:
+   ```zsh
+   UA-DOMAIN=[Your_Organization].com
+   UA-EMAIL=[Your_Name]@[Your_Organization].com
+
+   DB_HOST=timescaledb
+   DB_PORT=5432
+   DB_NAME=weather_db
+   DB_USER=postgres
+   DB_PASSWORD=postgres
+   ```
+4. (Optional for Local Testing, and time-consuming) Install Timescale DB locally: Follow the steps in Section `Local Testing: Local TimescaleDB Setup` of this `README` file below ↓.
+5. Ensure required data files exist: Place the required `.tsv` files for gridpoints data in the gridpoints_file directory, including:
+   - The mapping data between a sample of coordinates in the contiguous U.S. and NWS gridpoints, with a filename `gridpoints_contiguous_us_[YYYYMMDD]T[HHRRSS].tsv`
+<!--- TODO: Add more input files needed here --->
+6. At the project root directory,
+   1. Run `docker-compose up --build` to always rebuild the Docker images before starting the containers in case you made changes to `Dockerfile` or the code base, then to create and start the containers as defined in your `docker-compose.yml` file. The following will occurr in the order of...
+      - A PostgreSQL service with both TimescaleDB & PostGIS extensions will be spun up. 
+      - The `weather-microservice` service will be spun up.
+      - As defined in `Dockerfile`, `app/main.py` will be run so that...
+         - A table schema for gridpoints data will be initialized.
+         - Connection to Timescale DB will be tested.
+         - 'gridpoints' data will be loaded into PostgreSQL DB.
+         - ...
+   2. (Optional) Open a second terminal tab in either `Terminal.app` or your coding GUI. Run `docker ps` to verify two services are running indeed - one says "weather-microservice-demo-app" and the other says "timescale/timescaledb-ha:pg16".
+<!--- TODO: Add more things app/main.py does here --->
+   3. (Optional) Run `docker exec -it weather-microservice bash` to enter the project root directory of the `weather-microservice` service, in case you need to play around or troubleshoot.
+   4. (Optional) Run `docker exec -it timescale-db psql -U postgres -d weather_db` to log in the PostgreSQL DB `weather_db`, in case you need to run some SQL queries in it.
+   5. In the second terminal tab, run `docker-compose down` to stop all containers started by `docker-compose` and remove the stopped containers, networks, and default volumes to leave your system clean. Go back to the first terminal tab - you should see all Docker containers killed.
+
+### Local Testing: Local TimescaleDB Setup
+On macOS, run the following installation steps **locally but globally**, namely on the `Terminal.app` of your Mac device, outside a Docker container, and outside a Poetry virtual env. It will be a dreary experience, and note that **YMMV regarding the file paths** mentioned depending on the installation path of your `Homebrew`.
 1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
 
 2. Use `brew` to install PostgreSQL 16.x (The highest version compatible with TimescaleDB). Download TimescaleDB from GitHub. Then build and install it with `make`
@@ -95,7 +136,7 @@ SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
    postgis | 3.4.2
 (1 row)
 ```
-
+<!--- TODO: Clean up below this line --->
 ### Create a database connection module
 To test the Timescale DB connection from a module
 ```zsh

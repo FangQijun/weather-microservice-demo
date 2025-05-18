@@ -185,6 +185,7 @@ if __name__ == "__main__":
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         "data", "gridpoints_file", f"gridpoints_contiguous_us{timestamp_now}.tsv"
     )
+    # TODO: Missing an underscore in the filename.
     fetch_weather_points(
         shapefile_path=shapefile_path,
         output_path=output_path,

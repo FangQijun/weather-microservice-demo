@@ -29,6 +29,7 @@ def main():
     # Run the equivalent of the bash command to load gridpoints data into the TimescaleDB
     subprocess.run(
         ["python", "app/load/load_gridpoints.py", "--batch-size", "1000", "--num_rows", "5000"],
+        # TODO: Remove the '--num_rows' argument in production, as it is only for testing purposes
         check=True
     )
 
