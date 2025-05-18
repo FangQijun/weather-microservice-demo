@@ -14,11 +14,7 @@ A microservice for weather API data ETL
    git clone https://github.com/FangQijun/weather-microservice-demo.git
    cd weather-microservice-demo
    ```
-3. Make the shell script that specifies PostgreSQL DB extensions executable.
-   ```zsh
-   chmod +x docker-entrypoint-initdb.d/init-extensions.sh
-   ```
-4. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API key, of which you'd ne making API calls on behalf:
+3. An `.env` file is not tracked by Git for safety reason. Therefore you'll have to create a `.env` file in the root directory with `touch .env` with the following content, where the `UA-DOMAIN` and `UA-EMAIL` serve as substitute to National Weather Service (NWS) API key, of which you'd ne making API calls on behalf:
    ```zsh
    UA-DOMAIN=[Your_Organization].com
    UA-EMAIL=[Your_Name]@[Your_Organization].com
@@ -29,11 +25,11 @@ A microservice for weather API data ETL
    DB_USER=postgres
    DB_PASSWORD=postgres
    ```
-5. (Optional for Local Testing, and time-consuming) Install Timescale DB locally: Follow the steps in Section `Local Testing: Local TimescaleDB Setup` of this `README` file below ↓.
-6. Ensure required data files exist: Place the required `.tsv` files for gridpoints data in the gridpoints_file directory, including:
+4. (Optional for Local Testing, and time-consuming) Install Timescale DB locally: Follow the steps in Section `Local Testing: Local TimescaleDB Setup` of this `README` file below ↓.
+5. Ensure required data files exist: Place the required `.tsv` files for gridpoints data in the gridpoints_file directory, including:
    - The mapping data between a sample of coordinates in the contiguous U.S. and NWS gridpoints, with a filename `gridpoints_contiguous_us_[YYYYMMDD]T[HHRRSS].tsv`
 <!--- TODO: Add more input files needed here --->
-7. At the project root directory,
+6. At the project root directory,
    1. Run `docker-compose up --build` to always rebuild the Docker images before starting the containers in case you made changes to `Dockerfile` or the code base, then to create and start the containers as defined in your `docker-compose.yml` file. The following will occurr in the order of...
       - A PostgreSQL service with both TimescaleDB & PostGIS extensions will be spun up. 
       - The `weather-microservice` service will be spun up.
