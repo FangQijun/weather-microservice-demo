@@ -93,6 +93,7 @@ def initialize_gridpoints_schema():
 CREATE_DAILY_FORECASTS_TABLE = """
 CREATE TABLE IF NOT EXISTS daily_forecasts (
     id BIGSERIAL,
+    request_timestamp TIMESTAMPTZ NOT NULL,
     user_id VARCHAR(100) NOT NULL,
     input_longitude FLOAT NOT NULL,
     input_latitude FLOAT NOT NULL,
@@ -119,12 +120,13 @@ CREATE TABLE IF NOT EXISTS daily_forecasts (
     short_forecast TEXT,
     detailed_forecast TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (id, start_time)
+    PRIMARY KEY (user_id, request_timestamp, input_longitude, input_latitude, start_time)
 );
 """
 CREATE_HOURLY_FORECASTS_TABLE = """
 CREATE TABLE IF NOT EXISTS hourly_forecasts (
     id BIGSERIAL,
+    request_timestamp TIMESTAMPTZ NOT NULL,
     user_id VARCHAR(100) NOT NULL,
     input_longitude FLOAT NOT NULL,
     input_latitude FLOAT NOT NULL,
@@ -151,7 +153,7 @@ CREATE TABLE IF NOT EXISTS hourly_forecasts (
     short_forecast TEXT,
     detailed_forecast TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (id, start_time)
+    PRIMARY KEY (user_id, request_timestamp, input_longitude, input_latitude, start_time)
 );
 """
 

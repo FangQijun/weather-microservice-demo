@@ -86,7 +86,10 @@ def find_nearest_gridpoint(longitude: float, latitude: float, verbose=False) -> 
     return result_dict
 
 
-def fetch_weather_forecast(grid_id: str, grid_x: int, grid_y: int, is_hourly: bool = False, verbose: bool = False):
+def fetch_weather_forecast(
+        grid_id: str, grid_x: int, grid_y: int, 
+        is_hourly: bool = False, verbose: bool = False
+    ) -> Optional[Dict[str, Any]]:
     """
     Fetch weather forecast from NWS API
     
@@ -151,7 +154,7 @@ def parse_wind_speed(wind_speed_str: str) -> Tuple[int, int]:
 
 
 def save_forecast_to_file(
-        user_id: str, input_longitude: float, input_latitude: float,
+        request_timestamp: str, user_id: str, input_longitude: float, input_latitude: float,
         grid_id: str, grid_x: int, grid_y: int,
         forecast_data: Dict[str, Any], is_hourly: bool, verbose: bool = False,
     ) -> str:
@@ -230,6 +233,7 @@ def save_forecast_to_file(
         
         # Construct record
         record = {
+            "request_timestamp": request_timestamp,
             "user_id": user_id,
             "input_longitude": input_longitude,
             "input_latitude": input_latitude,
@@ -278,6 +282,7 @@ def save_forecast_to_file(
 
 def main():
     parser = argparse.ArgumentParser(description='Weather Microservice')
+    parser.add_argument('--request-timestamp', type=str, required=True, help='Timestamp when the request was made')
     parser.add_argument('--user-id', type=str, required=True, help='User ID')
     parser.add_argument('--longitude', type=float, required=True, help='Longitude')
     parser.add_argument('--latitude', type=float, required=True, help='Latitude')
@@ -308,6 +313,7 @@ def main():
     if forecast_data:
         logger.info("Successfully fetched forecast from NWS endpoint!")
         save_forecast_to_file(
+            request_timestamp=args.request_timestamp,
             user_id=args.user_id,
             input_longitude=args.longitude,
             input_latitude=args.latitude,

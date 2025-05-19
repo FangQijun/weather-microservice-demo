@@ -2,7 +2,7 @@ import os
 import sys
 import time
 import subprocess
-import argparse
+from datetime import datetime, timezone
 
 project_root = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_root)
@@ -56,6 +56,7 @@ def main():
 
     
     # Step 1: Run the equivalent of the bash command to load gridpoints data into the TimescaleDB
+    # This step only gets executed once
     logger.info(f">>> Step 1: Loading gridpoints lookup data into TimescaleDB...")
     result_1 = subprocess.run(
         ["python", "app/load/load_gridpoints.py", "--batch-size", "1000", "--num_rows", "5000"],
@@ -75,6 +76,7 @@ def main():
     user_id = "demo_user"
     latitude = 48.922601
     longitude = -97.683401
+    request_timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     # TODO: Does it make sense to define user_id, latitude, and longitude here?
     logger.info(f"Running weather service for user {user_id} at coordinates ({latitude}, {longitude})...")
     for is_hourly in [False, True]:
@@ -84,6 +86,7 @@ def main():
             [
                 "python", 
                 "app/extract/fetch_weather_forecasts.py", 
+                "--request-timestamp", request_timestamp,
                 "--user-id", user_id,
                 "--latitude", str(latitude),
                 "--longitude", str(longitude)
@@ -103,7 +106,8 @@ def main():
     result_3 = subprocess.run(
         [
             "python", 
-            "app/load/load_weather_forecasts.py", 
+            "app/load/load_weather_forecasts.py",
+            "--request-timestamp", request_timestamp, 
             "--user-id", user_id,
             "--latitude", str(latitude),
             "--longitude", str(longitude),
@@ -117,6 +121,28 @@ def main():
     else:
         logger.error(f">>> Step 3: Failed to load weather forecast data into TimescaleDB.\n")
         sys.exit(1)
+    
+
+    # Step 4: Run the equivalent of the bash command to load weather forecast data into the TimescaleDB
+    # logger.info(f">>> Step 4: Transforming weather forecast data in TimescaleDB with derived metrics...")
+    # result_4 = subprocess.run(
+    #     [
+    #         "python", 
+    #         "app/transform/transform_weather_forecasts.py",
+    #         "--request-timestamp", request_timestamp,
+    #         "--user-id", user_id,
+    #         "--latitude", str(latitude),
+    #         "--longitude", str(longitude),
+    #         "--verbose"
+    #     ],
+    #     check=False
+    # )
+    
+    # if result_4.returncode == 0:
+    #     logger.info(f">>> Step 4: Successfully transformed weather forecast data in TimescaleDB with derived metrics.\n")
+    # else:
+    #     logger.error(f">>> Step 4: Failed to transform weather forecast data in TimescaleDB with derived metrics.\n")
+    #     sys.exit(1)
 
     # Trick to keep the `weather-microservice` container running indefinitely unless the user stops it
     try:

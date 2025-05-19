@@ -183,9 +183,15 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
 
 
 ## Ambitions / Improvement Opportunities
-- For simplicity, there are only database `weather_db` and a few tables in TimescaleDB, but no schema was created.
+- For simplicity, there are only a database `weather_db` and a few tables created in TimescaleDB, but no schema was created for better data cataloging.
 - Some tables in TimescaleDB (e.g. `gridpoints`) needs a SCD2 setup, but unfortunately I ran out of time.
-- Deduplication of `forecast_` tables were done with a TimescaleDB SQL query in function `load_forecast_from_tsv()`, but it really needs to happen on application level to avoid DDoS attacks.
+- Deduplication of `forecast_` tables were done with a TimescaleDB SQL query in function `load_forecast_from_tsv()`, but it really needs to happen earlier on cache/application level to avoid DDoS attacks.
+- With limited time, I had no chance to implement unit and integration tests or configure a CI/CD pipeline
+- Here, the data transformation was done with SQL queries wrapped by a Python script. It'd be more elegant to use a local **dbt server** with `dbt-core` CLI.
+- Again, with limited time, I had no chance to defend my app against potential scalability issues
+   - A
+   - B
+<!--- TODO: scalability ideas --->
 
 
 ## Project References

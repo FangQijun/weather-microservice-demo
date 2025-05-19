@@ -23,9 +23,11 @@ logger = setup_logging(
 )
 
 
-def load_forecast_from_tsv(file_path: str, is_hourly: bool, user_id: str = None, 
-                           latitude: float = None, longitude: float = None,
-                           verbose: bool = False) -> bool:
+def load_forecast_from_tsv(
+        file_path: str, is_hourly: bool,
+        request_timestamp: str, user_id: str = None, latitude: float = None, longitude: float = None,
+        verbose: bool = False
+    ) -> bool:
     """
     Load forecast data from TSV file into the database.
     
@@ -89,7 +91,8 @@ def load_forecast_from_tsv(file_path: str, is_hourly: bool, user_id: str = None,
                     WHERE user_id = %s
                     AND ABS(input_latitude - %s) < 0.0001
                     AND ABS(input_longitude - %s) < 0.0001
-                """, (user_id, latitude, longitude))
+                    AND ABS(EXTRACT(EPOCH FROM (request_timestamp - %s))) < 900
+                """, (user_id, latitude, longitude, request_timestamp))
                 
                 if cursor.rowcount > 0 and verbose:
                     logger.info(f"Deleted {cursor.rowcount} existing records for this user and location")
@@ -109,6 +112,7 @@ def load_forecast_from_tsv(file_path: str, is_hourly: bool, user_id: str = None,
             cursor.executemany(insert_query, records)
             
             if verbose:
+                logger.info(records)
                 logger.info(f"Inserted {len(records)} records into {table_name}")
         
         logger.info(f"Successfully loaded {forecast_type} forecast data into the database")
@@ -119,8 +123,10 @@ def load_forecast_from_tsv(file_path: str, is_hourly: bool, user_id: str = None,
         return False
 
 
-def load_weather_forecasts(user_id: str = None, latitude: float = None, longitude: float = None, 
-                          verbose: bool = False) -> bool:
+def load_weather_forecasts(
+        request_timestamp: str, user_id: str = None, latitude: float = None, longitude: float = None,
+        verbose: bool = False
+    ) -> bool:
     """
     Main function to load both daily and hourly weather forecasts into the database.
     
@@ -160,10 +166,10 @@ def load_weather_forecasts(user_id: str = None, latitude: float = None, longitud
         return False
     
     # Parse the TSV files
-    if not load_forecast_from_tsv(daily_path, False, user_id, latitude, longitude, verbose):
+    if not load_forecast_from_tsv(daily_path, False, request_timestamp, user_id, latitude, longitude, verbose):
         logger.error("Failed to load daily forecast data.")
         return False
-    if not load_forecast_from_tsv(hourly_path, True, user_id, latitude, longitude, verbose):
+    if not load_forecast_from_tsv(hourly_path, True, request_timestamp, user_id, latitude, longitude, verbose):
         logger.error("Failed to load hourly forecast data.")
         return False
     
@@ -178,15 +184,17 @@ def main():
     Main entry point for the script.
     """
     parser = argparse.ArgumentParser(description='Load weather forecast data from TSV into TimescaleDB')
-    parser.add_argument('--user-id', type=str, help='User ID to filter by')
-    parser.add_argument('--latitude', type=float, help='Latitude to filter by')
-    parser.add_argument('--longitude', type=float, help='Longitude to filter by')
+    parser.add_argument('--request-timestamp', type=str, required=True, help='Timestamp when the request was made')
+    parser.add_argument('--user-id', type=str, required=True, help='User ID to filter by')
+    parser.add_argument('--latitude', type=float, required=True, help='Latitude to filter by')
+    parser.add_argument('--longitude', type=float, required=True, help='Longitude to filter by')
     parser.add_argument('--verbose', action='store_true', help='Enable verbose logging')
     
     args = parser.parse_args()
     
     # Load the data
     success = load_weather_forecasts(
+        request_timestamp=args.request_timestamp,
         user_id=args.user_id,
         latitude=args.latitude,
         longitude=args.longitude,
