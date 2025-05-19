@@ -2,6 +2,19 @@
 A microservice for weather API data ETL
 
 
+## Thought Processes
+1. It is a 2-step process to get the weather forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
+   1. Step 1 is to inquire which [Gridpoint](https://weather-gov.github.io/api/gridpoints) (a 2.5km x 2.5km rectangle on the map of the United States represented by an office code consisting of 3 capital letters and two integers) a specific lat/lon is located in with a payload looking like `https://api.weather.gov/points/{latitude},{longitude}`
+   2. Step 2 is to obtain the grid forecast for a `gridpoint`, use the `/points` endpoint to retrieve the current grid forecast endpoint by coordinates with a payload looking like `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast` and `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast/hourly`
+2. Gridpoints WFO/x/y should not be considered static but won't be updated often according to these GitHub Q&A threads [[1](https://github.com/weather-gov/api/discussions/621),[2](https://github.com/weather-gov/api/discussions/746)]
+3. Given bullet points 1-2, we decided to do the following:
+   1. Create our own list of 2.5km x 2.5km grids that are almost identical to said `gridpoint`s to perfectly cover the entirety of contiguous US. There are approximately 1.26M to be exact; 
+   2. Every month, for each centroid of the grid, make a "Step 1" API call to get which `gridpoint` the centroid, therefore the grid corresponds to (e.g. The 2.5km x 2.5km grid near Topeka, KS `[[-97.0799, 39.7451], [-97.0803, 39.7672], [-97.109, 39.7668], [-97.1085, 39.7448], [-97.0799, 39.7451]]` corresponds to Gridpoint `TOP/32,81`). Here are two examples showcasing how the grids indeed cover up the whole country.
+![New England](screenshots/Grid_Coverage_New_England_BW.png)
+![Greater Boston & RI](screenshots/Grid_Coverage_Greater_Boston_RI_BW.png)
+   3. With all the API responses, we can set up an SCD2 lookup table on our own database to find out which Gridpoint a requested lat/lon belongs to. To pull such mapping offline, instead of making an API call each time a request comes in, we reduced latency and enhanced reliability.
+
+
 ## Replay
 ### Run in a Docker container
 1. Prerequisites
@@ -48,7 +61,7 @@ A microservice for weather API data ETL
    5. (Optional) Run `docker logs weather-microservice` or `docker logs timescale-db` to look at the logs of the two services in case of troubleshooting.
    6. In the second terminal tab, run `docker-compose down` to stop all containers started by `docker-compose` and remove the stopped containers, networks, and default volumes to leave your system clean. Go back to the first terminal tab - you should see all Docker containers killed. If you had Docker Desktop installed, it'll say something like "The compose app is no longer running"
 
-### Local Testing: Local TimescaleDB Setup
+### Local Test: Local TimescaleDB Setup
 On macOS, run the following installation steps **locally but globally**, namely on the `Terminal.app` of your Mac device, outside a Docker container, and outside a Poetry virtual env. It will be a dreary experience, and note that **YMMV regarding the file paths** mentioned depending on the installation path of your `Homebrew`.
 1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
 
@@ -141,20 +154,17 @@ SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
    postgis | 3.4.2
 (1 row)
 ```
-<!--- TODO: Clean up below this line --->
-### Create a database connection module
+
+### More Local Tests
 To test the Timescale DB connection from a module
 ```zsh
 python src/database/timescale_db_connection.py
 ```
-
-### Define the schema for the gridpoints table
+To define the schemas for the gridpoints table
 ```zsh
 python src/database/define_schemas.py
 ```
-
-### Import data in the TSV file into the gridpoints table
-The app automatically finds the latest `.tsv` file (the greatest timestamp suffix) inside dir `./data/gridpoints_file` for ingestion. 
+To import data in the TSV file into the gridpoints table. The app automatically finds the latest `.tsv` file (the greatest timestamp suffix) inside dir `./data/gridpoints_file` for ingestion.
 To overwrite to table `gridpoints` with the entire TSV file (~1.26 million records), 1000 records per batch.
 ```zsh
 python app/load/load_gridpoints.py --batch-size 1000
@@ -169,26 +179,13 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
 ```
 
 
-## Thought Processes
-1. It is a 2-step process to get the weather forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
-   1. Step 1 is to inquire which [Gridpoint](https://weather-gov.github.io/api/gridpoints) (a 2.5km x 2.5km rectangle on the map of the United States represented by an office code consisting of 3 capital letters and two integers) a specific lat/lon is located in with a payload looking like `https://api.weather.gov/points/{latitude},{longitude}`
-   2. Step 2 is to obtain the grid forecast for a `gridpoint`, use the `/points` endpoint to retrieve the current grid forecast endpoint by coordinates with a payload looking like `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast` and `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast/hourly`
-2. Gridpoints WFO/x/y should not be considered static but won't be updated often according to these GitHub Q&A threads [[1](https://github.com/weather-gov/api/discussions/621),[2](https://github.com/weather-gov/api/discussions/746)]
-3. Given bullet points 1-2, we decided to do the following:
-   1. Create our own list of 2.5km x 2.5km grids that are almost identical to said `gridpoint`s to perfectly cover the entirety of contiguous US. There are approximately 1.26M to be exact; 
-   2. Every month, for each centroid of the grid, make a "Step 1" API call to get which `gridpoint` the centroid, therefore the grid corresponds to (e.g. The 2.5km x 2.5km grid near Topeka, KS `[[-97.0799, 39.7451], [-97.0803, 39.7672], [-97.109, 39.7668], [-97.1085, 39.7448], [-97.0799, 39.7451]]` corresponds to Gridpoint `TOP/32,81`). Here are two examples showcasing how the grids indeed cover up the whole country.
-![New England](screenshots/Grid_Coverage_New_England_BW.png)
-![Greater Boston & RI](screenshots/Grid_Coverage_Greater_Boston_RI_BW.png)
-   3. With all the API responses, we can set up an SCD2 lookup table on our own database to find out which Gridpoint a requested lat/lon belongs to. To pull such mapping offline, instead of making an API call each time a request comes in, we reduced latency and enhanced reliability.
-
-
 ## Ambitions / Improvement Opportunities
 - For simplicity, there are only a database `weather_db` and a few tables created in TimescaleDB, but no schema was created for better data cataloging.
 - Some tables in TimescaleDB (e.g. `gridpoints`) needs a SCD2 setup, but unfortunately I ran out of time.
 - Deduplication of `forecast_` tables were done with a TimescaleDB SQL query in function `load_forecast_from_tsv()`, but it really needs to happen earlier on cache/application level to avoid DDoS attacks.
-- With limited time, I had no chance to implement unit and integration tests or configure a CI/CD pipeline
+- With limited time, I didn't quite have a chance to implement unit and integration tests or configure a CI/CD pipeline
 - Here, the data transformation was done with SQL queries wrapped by a Python script. It'd be more elegant to use a local **dbt server** with `dbt-core` CLI.
-- Again, with limited time, I had no chance to defend my app against potential scalability issues
+- Again, with limited time, I didn't quite have a chance to defend my app against potential scalability issues
    - A
    - B
 <!--- TODO: scalability ideas --->
