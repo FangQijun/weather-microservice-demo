@@ -109,9 +109,7 @@ def fetch_weather_gridpoint_polygons(input_path: str, output_path: str, batch_si
             }
             all_records.append(record)
             count_success_responses += 1
-            if verbose:
-                logger.info(f"Successfully fetched data for gridpoint {grid_id}/{grid_x},{grid_y}.")
-            elif i % batch_size == batch_size - 1:
+            if verbose and ((i % batch_size == batch_size - 1) or (i % 20 == 19)):
                 logger.info(f"Successfully fetched data for gridpoint {grid_id}/{grid_x},{grid_y}.")
             
             # Write records by batch
@@ -139,6 +137,17 @@ def fetch_weather_gridpoint_polygons(input_path: str, output_path: str, batch_si
             logger.error(f"Error fetching data for gridpoint {grid_id}: {str(e)}")
             logger.info(f"Success count: {count_success_responses}, Failure count: {count_failed_responses}")
             continue
+        except ValueError as ve:
+            logger.error(f"Error processing data for gridpoint {grid_id}: {str(ve)}")
+            logger.info(f"Success count: {count_success_responses}, Failure count: {count_failed_responses}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error for gridpoint {grid_id}: {str(e)}")
+            logger.info(f"Success count: {count_success_responses}, Failure count: {count_failed_responses}")
+            continue
+            return False
+    
+    return True
 
 
 def main():

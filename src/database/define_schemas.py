@@ -91,14 +91,20 @@ def initialize_gridpoints_schema():
 
 CREATE_DIM_GRIDPOINTS_TABLE = """
 CREATE TABLE IF NOT EXISTS dim_gridpoints (
-    id SERIAL,
+    row_num SERIAL,
+    id TEXT NOT NULL,
     grid_id TEXT NOT NULL,
     grid_x INTEGER NOT NULL,
     grid_y INTEGER NOT NULL,
+    elevation FLOAT,
+    geometry_type TEXT,
+    geometry_coordinates TEXT,
     polygon GEOGRAPHY(POLYGON, 4326),
-    polygon_srid GEOMETRY,
+    polygon_srid GEOGRAPHY,
     polygon_centroid GEOGRAPHY(POINT, 4326),
-    polygon_centroid_srid GEOMETRY,
+    polygon_centroid_srid GEOGRAPHY,
+    polygon_centroid_lon FLOAT,
+    polygon_centroid_lat FLOAT,
     PRIMARY KEY (grid_id, grid_x, grid_y)
 );
 """

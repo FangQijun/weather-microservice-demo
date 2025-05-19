@@ -1,5 +1,5 @@
 """
-Script to load gridpoints data from TSV files into TimescaleDB.
+Script to load coords X gridpoints fact data from TSV files into TimescaleDB.
 """
 import os
 import sys
@@ -264,13 +264,6 @@ def main():
     if not success_2:
         logger.error("Failed to get unique gridpoints from the database.")
         return 1
-    
-    # success_3 = ingest_unique_gridpoints_from_tsv(
-    #     file_path=tsv_file_path
-    # )
-    # if not success_3:
-    #     logger.error("Failed to ingest unique gridpoints from the TSV file.")
-    #     return 1
     
     return 0
 

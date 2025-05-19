@@ -63,7 +63,7 @@ def main():
             "python",
             "app/load/load_gridpoints.py",
             "--batch-size", "100",
-            "--num-rows", "2000",
+            "--num-rows", "1000",
         ],
         # TODO: Remove the '--num-rows' argument in production, as it is only for testing purposes
         check=False
@@ -82,7 +82,7 @@ def main():
         [
             "python",
             "app/extract/fetch_weather_gridpoint_polygons.py",
-            "--batch-size", "200",
+            "--batch-size", "100",
             "--verbose"
         ],
         check=False
@@ -92,6 +92,24 @@ def main():
         logger.info(f">>> Step 1.2: Successfully fetched polygon info of gridpoints from NWS API.\n")
     else:
         logger.error(f">>> Step 1.2: Failed to fetch polygon info of gridpoints from NWS API.\n")
+        sys.exit(1)
+    
+    # Step 1.3: Run the equivalent of the bash command to load polygon info of gridpoints into the TimescaleDB
+    # This step only gets executed once
+    logger.info(f">>> Step 1.3: Loading polygon info of gridpoints into TimescaleDB from TSV file...")
+    result_1_3 = subprocess.run(
+        [
+            "python", 
+            "app/load/load_dim_gridpoints.py",
+            "--verbose"
+        ],
+        check=False
+    )
+
+    if result_1_3.returncode == 0:
+        logger.info(f">>> Step 1.3: Successfully loaded polygon info of gridpoints into TimescaleDB from TSV file.\n")
+    else:
+        logger.error(f">>> Step 1.3: Failed to load polygon info of gridpoints into TimescaleDB from TSV file.\n")
         sys.exit(1)
 
     
