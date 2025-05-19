@@ -112,7 +112,6 @@ def load_forecast_from_tsv(
             cursor.executemany(insert_query, records)
             
             if verbose:
-                logger.info(records)
                 logger.info(f"Inserted {len(records)} records into {table_name}")
         
         logger.info(f"Successfully loaded {forecast_type} forecast data into the database")
@@ -206,5 +205,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    # Example CLI command to run the script locally:
+    # Example CLI command to test the script locally:
     # python app/load/load_weather_forecasts.py

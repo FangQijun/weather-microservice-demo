@@ -225,17 +225,63 @@ def initialize_forecast_schema() -> bool:
         logger.error(f"Forecast schema initialization failed: {str(e)}")
         return False
 
+    
+CREATE_HOURLY_FORECASTS_METRICS_TABLE = """
+CREATE TABLE IF NOT EXISTS forecasts_hourly_metrics (
+    id BIGSERIAL,
+    user_id VARCHAR(100) NOT NULL,
+    request_timestamp TIMESTAMPTZ NOT NULL,
+    input_longitude FLOAT NOT NULL,
+    input_latitude FLOAT NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    number INTEGER,
+    temperature INTEGER,
+    max_temperature_in_24hr_window INTEGER,
+    min_temperature_in_24hr_window INTEGER,
+    temperature_ratio_in_24hr_window FLOAT,
+    wind_speed FLOAT,
+    wind_exceeds_daily_avg BOOLEAN,
+    lat_distance_from_forecast FLOAT,
+    lon_distance_from_forecast FLOAT,
+    probability_precipitation VARCHAR(4),
+    PRIMARY KEY (user_id, request_timestamp, input_longitude, input_latitude, start_time)
+);
 
-def create_hypertable():
+-- Create hypertable for time-series data if it doesn't exist
+SELECT create_hypertable('forecasts_hourly_metrics', 'start_time', if_not_exists => TRUE);
+
+-- Create indexes if they don't exist
+CREATE INDEX IF NOT EXISTS idx_forecasts_hourly_metrics_user_id ON forecasts_hourly_metrics(user_id);
+CREATE INDEX IF NOT EXISTS idx_forecasts_hourly_metrics_request ON forecasts_hourly_metrics(user_id, request_timestamp);
+"""
+
+
+def initialize_metric_schema() -> bool:
     """
-    Convert regular tables to TimescaleDB hypertables for tables that have time-series data.
+    Create necessary tables for storing augmented forecast data if they don't exist.
+    
+    Returns:
+        bool: True if successful
     """
-    # Gridpoints table is a reference table rather than a hypertable
-    pass
+    logger.info("Checking and creating necessary augmented forecast tables")
+    
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            logger.info("Creating forecasts_hourly_metrics table if it doesn't exist")
+            cursor.execute(CREATE_HOURLY_FORECASTS_METRICS_TABLE)
+            
+        logger.info("Augmented forecast tables created/verified successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error creating augmented forecast tables: {str(e)}")
+        return False
 
 
 if __name__ == "__main__":
     initialize_gridpoints_schema()
     initialize_forecast_schema()
-    # Example CLI command to run the script locally:
+    initialize_metric_schema()
+    # Example CLI command to test the script locally:
     # python src/database/define_schemas.py

@@ -333,6 +333,6 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    # Example CLI command to run the script locally:
+    # Example CLI command to test the script locally:
     # python app/extract/fetch_weather_forecasts.py --user-id abc --longitude -97.683401 --latitude 48.922601 --verbose
     # You should expect to see (FGF, 73, 155) as the closest gridpoint.
