@@ -19,7 +19,7 @@ logger = setup_logging(
 )
 
 
-def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[str]:
+def get_most_recent_file(sub_folder: str, prefix: str, extension: str = '.tsv') -> Optional[str]:
     """
     Find the most recent file with the specified extension in a given subfolder of data.
     Assumes filenames end with a timestamp in format YYYYMMDDTHHMMSS.
@@ -42,6 +42,8 @@ def get_most_recent_file(sub_folder: str, extension: str = '.tsv') -> Optional[s
     files_with_timestamps = []
     
     for file_name in os.listdir(dir_path):
+        if prefix and not file_name.startswith(prefix):
+            continue
         if not file_name.endswith(extension):
             continue
         

@@ -1,18 +1,27 @@
 # Ignore everything in data and logs directories
 data/gridpoints_file/*
 data/shapefile/*
-logs/extract/*
+data/forecast_daily/*
+data/forecast_enriched/*
+data/forecast_hourly/*
+logs/app/*
+logs/database/*
 logs/extract/*
 logs/load/*
-logs/database/*
+logs/transform/*
 
 # But keep the .gitkeep files
 !data/.gitkeep
 !data/gridpoints_file/.gitkeep
 !data/shapefile/.gitkeep
+!data/forecast_daily/.gitkeep
+!data/forecast_enriched/.gitkeep
+!data/forecast_hourly/.gitkeep
+!logs/app/.gitkeep
+!logs/database/.gitkeep
 !logs/extract/.gitkeep
 !logs/load/.gitkeep
-!logs/database/.gitkeep
+!logs/transform/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -188,3 +197,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Miscellaneous
+file_sys.txt
+*.DS_Store
