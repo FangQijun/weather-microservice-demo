@@ -231,7 +231,7 @@ def main():
     logger.info("Attempting to automatically find the most recent gridpoints TSV file")
     file_path = get_most_recent_file(
         sub_folder="gridpoints_file",
-        prefix = "gridpoints_contiguous_us",
+        prefix = "gridpoints_contiguous_us_",
         extension = '.tsv'
     )
     if not file_path:

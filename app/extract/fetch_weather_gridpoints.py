@@ -193,9 +193,8 @@ def main():
     )
     output_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        "data", "gridpoints_file", f"gridpoints_contiguous_us{timestamp_now}.tsv"
+        "data", "gridpoints_file", f"gridpoints_contiguous_us_{timestamp_now}.tsv"
     )
-    # TODO: Missing an underscore in the filename.
 
     success = fetch_weather_points(
         shapefile_path=shapefile_path,

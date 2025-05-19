@@ -55,24 +55,43 @@ def main():
     test_connection()
 
     
-    # Step 1: Run the equivalent of the bash command to load gridpoints data into the TimescaleDB
+    # Step 1.1: Run the equivalent of the bash command to load gridpoints data into the TimescaleDB
     # This step only gets executed once
-    logger.info(f">>> Step 1: Loading gridpoints lookup data into TimescaleDB...")
-    result_1 = subprocess.run(
+    logger.info(f">>> Step 1.1: Loading gridpoints lookup data into TimescaleDB...")
+    result_1_1 = subprocess.run(
         [
             "python",
             "app/load/load_gridpoints.py",
-            "--batch-size", "1000",
-            "--num-rows", "20000",
+            "--batch-size", "100",
+            "--num-rows", "2000",
         ],
         # TODO: Remove the '--num-rows' argument in production, as it is only for testing purposes
         check=False
     )
 
-    if result_1.returncode == 0:
-        logger.info(f">>> Step 1: Successfully loaded gridpoints lookup data into TimescaleDB.\n")
+    if result_1_1.returncode == 0:
+        logger.info(f">>> Step 1.1: Successfully loaded gridpoints lookup data into TimescaleDB.\n")
     else:
-        logger.error(f">>> Step 1: Failed to load gridpoints lookup data into TimescaleDB.\n")
+        logger.error(f">>> Step 1.1: Failed to load gridpoints lookup data into TimescaleDB.\n")
+        sys.exit(1)
+    
+    # Step 1.2: Run the equivalent of the bash command to fetch polygon info from the gridpoint endpoint of  NWS API
+    # This step only gets executed once
+    logger.info(f">>> Step 1.2: Fetching polygon info of gridpoints from NWS API...")
+    result_1_2 = subprocess.run(
+        [
+            "python",
+            "app/extract/fetch_weather_gridpoint_polygons.py",
+            "--batch-size", "200",
+            "--verbose"
+        ],
+        check=False
+    )
+
+    if result_1_2.returncode == 0:
+        logger.info(f">>> Step 1.2: Successfully fetched polygon info of gridpoints from NWS API.\n")
+    else:
+        logger.error(f">>> Step 1.2: Failed to fetch polygon info of gridpoints from NWS API.\n")
         sys.exit(1)
 
     
