@@ -55,6 +55,12 @@ def calculate_hourly_metrics(user_id: str, request_timestamp: str, verbose: bool
         END AS temperature_ratio_in_24hr_window,
         wind_speed,
         wind_speed > avg_wind_speed_in_24hr_window AS wind_exceeds_daily_avg,
+        grid_id,
+        grid_x,
+        grid_y,
+        grid_geometry_coordinates,
+        grid_polygon_centroid_lon,
+        grid_polygon_centroid_lat,
         lat_distance_from_forecast,
         lon_distance_from_forecast,
         probability_precipitation::VARCHAR(3) || '%' AS probability_precipitation
@@ -84,28 +90,46 @@ def calculate_hourly_metrics(user_id: str, request_timestamp: str, verbose: bool
                 ORDER BY number
                 ROWS BETWEEN CURRENT ROW AND 23 FOLLOWING
             ) AS avg_wind_speed_in_24hr_window,
-            0.0 AS lat_distance_from_forecast,
-            0.0 AS lon_distance_from_forecast,
+            grid_id,
+            grid_x,
+            grid_y,
+            grid_geometry_coordinates,
+            grid_polygon_centroid_lon,
+            grid_polygon_centroid_lat,
+            ABS(grid_polygon_centroid_lon - input_longitude) AS lon_distance_from_forecast,
+            ABS(grid_polygon_centroid_lat - input_latitude) AS lat_distance_from_forecast,
             probability_precipitation
         FROM (
             SELECT 
-                user_id,
-                request_timestamp,
-                input_longitude,
-                input_latitude,
-                start_time,
-                end_time,
-                number,
-                temperature,
-                COALESCE(wind_speed_low, 0) AS wind_speed_low,
-                COALESCE(wind_speed_high, 0) AS wind_speed_high,
-                (COALESCE(wind_speed_low, 0) + COALESCE(wind_speed_high, 0)) / 2.0 AS wind_speed,
-                COALESCE(probability_precipitation, 0) AS probability_precipitation
+                hf.user_id,
+                hf.request_timestamp,
+                hf.input_longitude,
+                hf.input_latitude,
+                hf.start_time,
+                hf.end_time,
+                hf.number,
+                hf.temperature,
+                COALESCE(hf.wind_speed_low, 0) AS wind_speed_low,
+                COALESCE(hf.wind_speed_high, 0) AS wind_speed_high,
+                (COALESCE(hf.wind_speed_low, 0) + COALESCE(hf.wind_speed_high, 0)) / 2.0 AS wind_speed,
+                dg.grid_id,
+                dg.grid_x,
+                dg.grid_y,
+                dg.geometry_coordinates AS grid_geometry_coordinates,
+                dg.polygon_centroid_lon AS grid_polygon_centroid_lon,
+                dg.polygon_centroid_lat AS grid_polygon_centroid_lat,
+                COALESCE(hf.probability_precipitation, 0) AS probability_precipitation
             FROM 
-                hourly_forecasts
+                hourly_forecasts AS hf
+            LEFT JOIN
+                dim_gridpoints AS dg
+            ON
+                hf.grid_id = dg.grid_id
+                AND hf.grid_x = dg.grid_x
+                AND hf.grid_y = dg.grid_y
             WHERE 
-                user_id = '{}'
-                AND request_timestamp = '{}'
+                hf.user_id = '{}'
+                AND hf.request_timestamp = '{}'
         ) AS w
     ) AS u
     ORDER BY 1,2,3,4,5
