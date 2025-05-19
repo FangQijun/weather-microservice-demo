@@ -59,9 +59,14 @@ def main():
     # This step only gets executed once
     logger.info(f">>> Step 1: Loading gridpoints lookup data into TimescaleDB...")
     result_1 = subprocess.run(
-        ["python", "app/load/load_gridpoints.py", "--batch-size", "1000", "--num_rows", "5000"],
-        # TODO: Remove the '--num_rows' argument in production, as it is only for testing purposes
-        check=True
+        [
+            "python",
+            "app/load/load_gridpoints.py",
+            "--batch-size", "1000",
+            "--num-rows", "20000",
+        ],
+        # TODO: Remove the '--num-rows' argument in production, as it is only for testing purposes
+        check=False
     )
 
     if result_1.returncode == 0:

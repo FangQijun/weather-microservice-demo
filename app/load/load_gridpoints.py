@@ -4,14 +4,15 @@ Script to load gridpoints data from TSV files into TimescaleDB.
 import os
 import sys
 import argparse
-from typing import List, Dict, Any, Optional
 import time
+import pandas as pd
 from pathlib import Path
+from typing import List, Dict, Any, Optional
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(project_root)
 from src.database.timescale_db_connection import get_db_cursor, test_connection
-from src.database.define_schemas import initialize_gridpoints_schema
+from src.database.define_schemas import initialize_gridpoints_schema, initialize_dim_gridpoints_schema
 from app.utils.process_gridpoints import get_most_recent_file, parse_tsv_file, validate_gridpoint_row
 from app.utils.log_config import setup_logging
 
@@ -168,19 +169,71 @@ def load_gridpoints_from_tsv(file_path: str, num_rows: Optional[int] = None, bat
         return False
 
 
+def get_unique_gridpoints(file_path: str) -> bool:
+    """
+    Get unique gridpoints from the database.
+
+    Args:
+        file_path (str): Path to the output TSV file
+    
+    Returns:
+        bool: True if successful
+    """
+    GET_UNIQUE_GRIDPOINTS = """
+    SELECT DISTINCT grid_id, grid_x, grid_y
+    FROM gridpoints
+    ORDER BY grid_id, grid_x, grid_y;
+    """
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            logger.info(f"Fetching unique gridpoints from the database")
+            cursor.execute(GET_UNIQUE_GRIDPOINTS)
+            
+            gridpoint_dict_list = []
+            for row in cursor.fetchall():
+                # Convert row to dictionary
+                columns = [desc[0] for desc in cursor.description]
+                gridpoint_dict = dict(zip(columns, row))
+                gridpoint_dict_list.append(gridpoint_dict)
+            
+            logger.info(f"There are {len(gridpoint_dict_list)} unique gridpoints in the database")
+
+        if len(gridpoint_dict_list) > 0:
+            df = pd.DataFrame(gridpoint_dict_list)
+            df.to_csv(
+                file_path,
+                sep='\t',
+                index=False,
+                mode='w',
+                header=True
+            )
+            return True
+        else:
+            logger.error("No gridpoint found in the database somehow. :/")
+            return False
+    
+    except Exception as e:
+        logger.error(f"Error getting unique gridpoints: {str(e)}")
+        return False
+
+
 def main():
     """
     Main entry point for the script.
     """
     parser = argparse.ArgumentParser(description='Load gridpoints data from TSV into TimescaleDB')
-    parser.add_argument('--num_rows', type=int, default=None, help='Number of rows to read from the file.')
+    parser.add_argument('--num-rows', type=int, default=None, help='Number of rows to read from the file.')
     parser.add_argument('--batch-size', type=int, default=1000, help='Batch size for database inserts')
     parser.add_argument('--mode', type=str, default='o', choices=['o', 'a'], help='Mode of operation: "o" for overwrite, "a" for append')
     args = parser.parse_args()
-    file_path = None
     
+    file_path = None
     logger.info("Attempting to automatically find the most recent gridpoints TSV file")
-    file_path = get_most_recent_file(sub_folder="gridpoints_file")
+    file_path = get_most_recent_file(
+        sub_folder="gridpoints_file",
+        prefix = "gridpoints_contiguous_us",
+        extension = '.tsv'
+    )
     if not file_path:
         logger.error("No suitable TSV files found. Please specify a file path.")
         return 1
@@ -191,14 +244,35 @@ def main():
         return 1
     
     # Load the data
-    success = load_gridpoints_from_tsv(
+    success_1 = load_gridpoints_from_tsv(
         file_path=file_path,
         num_rows=args.num_rows,
         batch_size=args.batch_size,
         mode=args.mode
     )
+    if not success_1:
+        logger.error("Failed to load tsv file into gridpoints.")
+        return 1
+
+    tsv_file_path = os.path.join(
+        project_root, 
+        "data",
+        "gridpoints_file",
+        "unique_gridpoints.tsv"
+    )
+    success_2 = get_unique_gridpoints(tsv_file_path)
+    if not success_2:
+        logger.error("Failed to get unique gridpoints from the database.")
+        return 1
     
-    return 0 if success else 1
+    # success_3 = ingest_unique_gridpoints_from_tsv(
+    #     file_path=tsv_file_path
+    # )
+    # if not success_3:
+    #     logger.error("Failed to ingest unique gridpoints from the TSV file.")
+    #     return 1
+    
+    return 0
 
 
 if __name__ == "__main__":

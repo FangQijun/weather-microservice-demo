@@ -89,6 +89,58 @@ def initialize_gridpoints_schema():
         return False
 
 
+CREATE_DIM_GRIDPOINTS_TABLE = """
+CREATE TABLE IF NOT EXISTS dim_gridpoints (
+    id SERIAL,
+    grid_id TEXT NOT NULL,
+    grid_x INTEGER NOT NULL,
+    grid_y INTEGER NOT NULL,
+    polygon GEOGRAPHY(POLYGON, 4326),
+    polygon_srid GEOMETRY,
+    polygon_centroid GEOGRAPHY(POINT, 4326),
+    polygon_centroid_srid GEOMETRY,
+    PRIMARY KEY (grid_id, grid_x, grid_y)
+);
+"""
+
+CREATE_DIM_GRIDPOINTS_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_dim_gridpoints_grid_id ON dim_gridpoints (grid_id);",
+    "CREATE INDEX IF NOT EXISTS idx_dim_gridpoints_grid_xy ON dim_gridpoints (grid_id, grid_x, grid_y);",
+    "CREATE INDEX IF NOT EXISTS idx_dim_gridpoints_geog ON dim_gridpoints USING GIST(polygon_srid);",
+    "CREATE INDEX IF NOT EXISTS idx_dim_gridpoints_centroid_point ON dim_gridpoints USING GIST(polygon_centroid_srid);"
+]
+
+
+def initialize_dim_gridpoints_schema():
+    """
+    Defines the column schema of `dim_gridpoints` table. Creates tables and indexes if they don't exist.
+    
+    Returns:
+        bool: True if successful
+    """
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            # Create dim_gridpoints table
+            cursor.execute(CREATE_DIM_GRIDPOINTS_TABLE)
+            logger.info("Dim gridpoints table created or already exists")
+            
+            # Create indexes
+            for index_sql in CREATE_DIM_GRIDPOINTS_INDEXES:
+                cursor.execute(index_sql)
+            logger.info("Dim gridpoints indexes created or already exist")
+        
+        if check_table_exists(table_name="dim_gridpoints"):
+            logger.info("Dim gridpoints table exists and is ready for use")
+            logger.info("Dim gridpoints schema initialization completed successfully")
+        else:
+            logger.warning("Dim gridpoints table does NOT exist after initialization")
+            return False
+        return True
+    except Exception as e:
+        logger.error(f"Dim gridpoints schema initialization failed: {str(e)}")
+        return False
+
+
 # SQL for creating the daily and hourly forecasts tables
 CREATE_DAILY_FORECASTS_TABLE = """
 CREATE TABLE IF NOT EXISTS daily_forecasts (
@@ -281,6 +333,7 @@ def initialize_metric_schema() -> bool:
 
 if __name__ == "__main__":
     initialize_gridpoints_schema()
+    initialize_dim_gridpoints_schema()
     initialize_forecast_schema()
     initialize_metric_schema()
     # Example CLI command to test the script locally:

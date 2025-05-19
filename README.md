@@ -171,11 +171,11 @@ python app/load/load_gridpoints.py --batch-size 1000
 ```
 To overwrite to table `gridpoints` with the first 50,000 records of the TSV file, 1000 records per batch.
 ```zsh
-python app/load/load_gridpoints.py --batch-size 1000 --num_rows 50000
+python app/load/load_gridpoints.py --batch-size 1000 --num-rows 50000
 ```
 To **append** to table `gridpoints` with the first 30,000 records of the TSV file, 1000 records per batch.
 ```zsh
-python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
+python app/load/load_gridpoints.py --batch-size 1000 --num-rows 30000 --mode a
 ```
 
 
