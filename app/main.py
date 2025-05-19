@@ -124,25 +124,25 @@ def main():
     
 
     # Step 4: Run the equivalent of the bash command to load weather forecast data into the TimescaleDB
-    # logger.info(f">>> Step 4: Transforming weather forecast data in TimescaleDB with derived metrics...")
-    # result_4 = subprocess.run(
-    #     [
-    #         "python", 
-    #         "app/transform/transform_weather_forecasts.py",
-    #         "--request-timestamp", request_timestamp,
-    #         "--user-id", user_id,
-    #         "--latitude", str(latitude),
-    #         "--longitude", str(longitude),
-    #         "--verbose"
-    #     ],
-    #     check=False
-    # )
+    logger.info(f">>> Step 4: Transforming weather forecast data in TimescaleDB with derived metrics...")
+    result_4 = subprocess.run(
+        [
+            "python", 
+            "app/transform/transform_weather_forecasts.py",
+            "--request-timestamp", request_timestamp,
+            "--user-id", user_id,
+            "--latitude", str(latitude),
+            "--longitude", str(longitude),
+            "--verbose"
+        ],
+        check=False
+    )
     
-    # if result_4.returncode == 0:
-    #     logger.info(f">>> Step 4: Successfully transformed weather forecast data in TimescaleDB with derived metrics.\n")
-    # else:
-    #     logger.error(f">>> Step 4: Failed to transform weather forecast data in TimescaleDB with derived metrics.\n")
-    #     sys.exit(1)
+    if result_4.returncode == 0:
+        logger.info(f">>> Step 4: Successfully transformed weather forecast data in TimescaleDB with derived metrics.\n")
+    else:
+        logger.error(f">>> Step 4: Failed to transform weather forecast data in TimescaleDB with derived metrics.\n")
+        sys.exit(1)
 
     # Trick to keep the `weather-microservice` container running indefinitely unless the user stops it
     try:

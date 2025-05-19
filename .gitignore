@@ -4,10 +4,11 @@ data/shapefile/*
 data/forecast_daily/*
 data/forecast_enriched/*
 data/forecast_hourly/*
-logs/extract/*
+logs/app/*
+logs/database/*
 logs/extract/*
 logs/load/*
-logs/database/*
+logs/transform/*
 
 # But keep the .gitkeep files
 !data/.gitkeep
@@ -16,9 +17,11 @@ logs/database/*
 !data/forecast_daily/.gitkeep
 !data/forecast_enriched/.gitkeep
 !data/forecast_hourly/.gitkeep
+!logs/app/.gitkeep
+!logs/database/.gitkeep
 !logs/extract/.gitkeep
 !logs/load/.gitkeep
-!logs/database/.gitkeep
+!logs/transform/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
