@@ -63,8 +63,7 @@ def find_nearest_gridpoint(longitude: float, latitude: float, verbose=False) -> 
     
     with get_db_cursor(commit=False) as cursor:
         try:
-            if verbose:
-                logger.info(f"Executing SQL query to find nearest gridpoint: \n{NEAREST_GRIDPOINT}")
+            logger.info(f"Executing SQL query to find nearest gridpoint... \n{NEAREST_GRIDPOINT if verbose else ""}")
             cursor.execute(NEAREST_GRIDPOINT)
             result = cursor.fetchone()
             if result:
@@ -79,7 +78,7 @@ def find_nearest_gridpoint(longitude: float, latitude: float, verbose=False) -> 
             if verbose:
                 logger.info(f"Inquiry made about ({longitude}, {latitude}).")
                 logger.info(f"Centroid ({result_dict["centroid_lon"]}, {result_dict["centroid_lat"]}) is the cloest pre-defined centroid to it, with a distance of {result_dict["distance_meters"]} meters.")
-                logger.info(f"... which corresponds to the Gridpoint ({result_dict["grid_id"]}, {result_dict["grid_x"]}, {result_dict["grid_y"]}).")
+                logger.info(f"... which corresponds to the Gridpoint ID ({result_dict["grid_id"]}, {result_dict["grid_x"]}, {result_dict["grid_y"]}).")
         except Exception as e:
             logger.error(f"Error finding nearest gridpoint to ({longitude}, {latitude}): {e}")
             return None
@@ -119,8 +118,8 @@ def fetch_weather_forecast(grid_id: str, grid_x: int, grid_y: int, is_hourly: bo
         response.raise_for_status()
         json_data = response.json()
         if verbose:
-            logger.info(f"Response for {grid_id}/{grid_x},{grid_y}:")
-            logger.info(json.dumps(json_data, indent=4))
+            logger.info(f"Received {'hourly' if is_hourly else 'daily'} forecast response for Grid ID ({grid_id}, {grid_x},{grid_y}):")
+            # logger.info(json.dumps(json_data, indent=4))
         return json_data
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching {'hourly' if is_hourly else 'daily'} forecast: {e}")
@@ -217,6 +216,18 @@ def save_forecast_to_file(
             period["probabilityOfPrecipitation"].get("value") is not None:
             prob_precip = period["probabilityOfPrecipitation"]["value"]
         
+        # Get dew point
+        dew_point = None
+        if is_hourly and period.get("dewpoint") and \
+            period["dewpoint"].get("value") is not None:
+            dew_point = period["dewpoint"]["value"]
+        
+        # Get relative humidity
+        relative_humidity = None
+        if is_hourly and period.get("relativeHumidity") and \
+            period["relativeHumidity"].get("value") is not None:
+            relative_humidity = period["relativeHumidity"]["value"]
+        
         # Construct record
         record = {
             "input_longitude": input_longitude,
@@ -235,7 +246,9 @@ def save_forecast_to_file(
             "is_daytime": period.get("isDaytime", ""),
             "temperature": period.get("temperature", ""),
             "temperature_trend": period.get("temperatureTrend", ""),
-            "prob_precip": prob_precip,
+            "probability_precipitation": prob_precip,
+            "dew_point": dew_point,
+            "relative_humidity": relative_humidity,
             "wind_speed_low": wind_speed_low,
             "wind_speed_high": wind_speed_high,
             "wind_direction": period.get("windDirection", ""),
@@ -247,13 +260,12 @@ def save_forecast_to_file(
     
     df = pd.DataFrame(records)
     
-    file_exists = os.path.isfile(file_path)
     df.to_csv(
         file_path,
         sep='\t',
         index=False,
-        mode='a' if file_exists else 'w',  # Append if the output file exists, write if new
-        header=not file_exists   # Write header only if the output file doesn't exist
+        mode='w',
+        header=True
     )
     
     if verbose:
@@ -281,7 +293,6 @@ def main():
     )
     if nearest_gridpoint:
         logger.info("Successfully found nearest Gridpoint!")
-        
         forecast_data = fetch_weather_forecast(
             grid_id=nearest_gridpoint["grid_id"],
             grid_x=nearest_gridpoint["grid_x"],

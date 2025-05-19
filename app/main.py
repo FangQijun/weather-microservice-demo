@@ -43,11 +43,11 @@ def main():
     """
     Main function to run the weather microservice.
     """
-    logger.info("Weather microservice is starting...")
+    logger.info(f"Weather microservice is starting...")
 
 
     # Step 0: DB connection
-    logger.info(">>> Step 0: Setting up database connection...")
+    logger.info(f">>> Step 0: Setting up database connection...")
     from src.database.create_schema_gridpoints import initialize_schema
     initialize_schema()
 
@@ -56,7 +56,7 @@ def main():
 
     
     # Step 1: Run the equivalent of the bash command to load gridpoints data into the TimescaleDB
-    logger.info(">>> Step 1: Loading gridpoints lookup data into TimescaleDB...")
+    logger.info(f">>> Step 1: Loading gridpoints lookup data into TimescaleDB...")
     result_1 = subprocess.run(
         ["python", "app/load/load_gridpoints.py", "--batch-size", "1000", "--num_rows", "5000"],
         # TODO: Remove the '--num_rows' argument in production, as it is only for testing purposes
@@ -64,40 +64,42 @@ def main():
     )
 
     if result_1.returncode == 0:
-        logger.info(">>> Step 1: Successfully loaded gridpoints lookup data into TimescaleDB.")
+        logger.info(f">>> Step 1: Successfully loaded gridpoints lookup data into TimescaleDB.\n")
     else:
-        logger.error(">>> Step 1: Failed to load gridpoints lookup data into TimescaleDB.")
+        logger.error(f">>> Step 1: Failed to load gridpoints lookup data into TimescaleDB.\n")
         sys.exit(1)
 
     
     # Step 2: Run the equivalent of the bash command to extract weather data from the forecast endpoint of the NWS API
-    logger.info(">>> Step 2: Extracting weather forecast data from API...")
+    logger.info(f">>> Step 2: Extracting weather forecast data from API...")
     user_id = "demo_user"
     latitude = 48.922601
     longitude = -97.683401
     # TODO: Does it make sense to define user_id, latitude, and longitude here?
     logger.info(f"Running weather service for user {user_id} at coordinates ({latitude}, {longitude})...")
-    result_2 = subprocess.run(
-        [
-            "python", 
-            "app/extract/fetch_weather_forecasts.py", 
-            "--user-id", user_id,
-            "--latitude", str(latitude),
-            "--longitude", str(longitude),
-            "--verbose"
-        ],
-        check=False
-    )
-    
-    if result_2.returncode == 0:
-        logger.info(">>> Step 2: Successfully extracted weather forecast data from API.")
-    else:
-        logger.error(">>> Step 2: Failed to extract weather forecast data from API.")
-        sys.exit(1)
+    for is_hourly in [False, True]:
+        forecast_type = "hourly" if is_hourly else "daily"
+        logger.info(f"\n--- {forecast_type.capitalize()} Forecast ---\n")
+        result_2 = subprocess.run(
+            [
+                "python", 
+                "app/extract/fetch_weather_forecasts.py", 
+                "--user-id", user_id,
+                "--latitude", str(latitude),
+                "--longitude", str(longitude)
+            ] + (["--is-hourly"] if is_hourly else []) + ["--verbose"],
+            check=False
+        )
+        
+        if result_2.returncode == 0:
+            logger.info(f">>> Step 2: Successfully extracted {forecast_type} weather forecast data from API.\n")
+        else:
+            logger.error(f">>> Step 2: Failed to extract {forecast_type} weather forecast data from API.\n")
+            sys.exit(1)
 
 
     # Step 3: Run the equivalent of the bash command to load weather forecast data into the TimescaleDB
-    # logger.info(">>> Step 3: Loading weather forecast data into TimescaleDB...")
+    # logger.info(f">>> Step 3: Loading weather forecast data into TimescaleDB...")
     # result_3 = subprocess.run(
     #     [
     #         "python", 
@@ -111,9 +113,9 @@ def main():
     # )
     
     # if result_3.returncode == 0:
-    #     logger.info(">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.")
+    #     logger.info(f">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.\n")
     # else:
-    #     logger.error(">>> Step 3: Failed to load weather forecast data into TimescaleDB.")
+    #     logger.error(f">>> Step 3: Failed to load weather forecast data into TimescaleDB.\n")
     #     sys.exit(1)
 
     # Trick to keep the `weather-microservice` container running indefinitely unless the user stops it
