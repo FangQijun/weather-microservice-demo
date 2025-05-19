@@ -11,7 +11,7 @@ from pathlib import Path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(project_root)
 from src.database.timescale_db_connection import get_db_cursor, test_connection
-from src.database.create_schema_gridpoints import initialize_schema
+from src.database.define_schemas import initialize_gridpoints_schema
 from app.utils.process_gridpoints import get_most_recent_file, parse_tsv_file, validate_gridpoint_row
 from app.utils.log_config import setup_logging
 
@@ -124,7 +124,7 @@ def load_gridpoints_from_tsv(file_path: str, num_rows: Optional[int] = None, bat
             return False
         
         # Initialize schema if needed
-        if not initialize_schema():
+        if not initialize_gridpoints_schema():
             logger.error("Schema initialization failed. Aborting.")
             return False
         

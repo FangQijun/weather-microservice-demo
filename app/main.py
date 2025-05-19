@@ -48,8 +48,8 @@ def main():
 
     # Step 0: DB connection
     logger.info(f">>> Step 0: Setting up database connection...")
-    from src.database.create_schema_gridpoints import initialize_schema
-    initialize_schema()
+    from src.database.define_schemas import initialize_gridpoints_schema
+    initialize_gridpoints_schema()
 
     from src.database.timescale_db_connection import test_connection
     test_connection()
@@ -99,24 +99,24 @@ def main():
 
 
     # Step 3: Run the equivalent of the bash command to load weather forecast data into the TimescaleDB
-    # logger.info(f">>> Step 3: Loading weather forecast data into TimescaleDB...")
-    # result_3 = subprocess.run(
-    #     [
-    #         "python", 
-    #         "app/load/load_weather_forecasts.py", 
-    #         "--user-id", user_id,
-    #         "--latitude", str(latitude),
-    #         "--longitude", str(longitude),
-    #         "--verbose"
-    #     ],
-    #     check=False
-    # )
+    logger.info(f">>> Step 3: Loading weather forecast data into TimescaleDB...")
+    result_3 = subprocess.run(
+        [
+            "python", 
+            "app/load/load_weather_forecasts.py", 
+            "--user-id", user_id,
+            "--latitude", str(latitude),
+            "--longitude", str(longitude),
+            "--verbose"
+        ],
+        check=False
+    )
     
-    # if result_3.returncode == 0:
-    #     logger.info(f">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.\n")
-    # else:
-    #     logger.error(f">>> Step 3: Failed to load weather forecast data into TimescaleDB.\n")
-    #     sys.exit(1)
+    if result_3.returncode == 0:
+        logger.info(f">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.\n")
+    else:
+        logger.error(f">>> Step 3: Failed to load weather forecast data into TimescaleDB.\n")
+        sys.exit(1)
 
     # Trick to keep the `weather-microservice` container running indefinitely unless the user stops it
     try:

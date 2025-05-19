@@ -1,6 +1,7 @@
 # Weather Microservice Demo
 A microservice for weather API data ETL
 
+
 ## Replay
 ### Run in a Docker container
 1. Prerequisites
@@ -149,7 +150,7 @@ python src/database/timescale_db_connection.py
 
 ### Define the schema for the gridpoints table
 ```zsh
-python src/database/create_schema_gridpoints.py
+python src/database/define_schemas.py
 ```
 
 ### Import data in the TSV file into the gridpoints table
@@ -180,6 +181,13 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
 ![Greater Boston & RI](screenshots/Grid_Coverage_Greater_Boston_RI_BW.png)
    3. With all the API responses, we can set up an SCD2 lookup table on our own database to find out which Gridpoint a requested lat/lon belongs to. To pull such mapping offline, instead of making an API call each time a request comes in, we reduced latency and enhanced reliability.
 
+
+## Ambitions / Improvement Opportunities
+- For simplicity, there are only database `weather_db` and a few tables in TimescaleDB, but no schema was created.
+- Some tables in TimescaleDB (e.g. `gridpoints`) needs a SCD2 setup, but unfortunately I ran out of time.
+- Deduplication of `forecast_` tables were done with a TimescaleDB SQL query in function `load_forecast_from_tsv()`, but it really needs to happen on application level to avoid DDoS attacks.
+
+
 ## Project References
 1. [National Weather Service API](https://www.weather.gov/documentation/services-web-api)
 2. National Weather Service API [forecast update schedule](https://www.weather.gov/gid/nwr_general), hourly weather forecasts are updated every hour approximately 5 minutes after the top of the hour.
@@ -194,5 +202,3 @@ python app/load/load_gridpoints.py --batch-size 1000 --num_rows 30000 --mode a
 8. Web tool to [stitch images](https://pinetools.com/merge-images).
 9. Web tool to [show file differences](https://www.diffchecker.com/text-compare/).
 10. Pros and cons of PostGIS GEOGRAPHY and GEOMETRY types: [GEOGRAPHY vs GEOMETRY](https://gis.stackexchange.com/questions/6681/pros-and-cons-of-postgis-geography-and-geometry-types).
-
-## Ambitions / Improvement Opportunities
