@@ -151,7 +151,7 @@ def parse_wind_speed(wind_speed_str: str) -> Tuple[int, int]:
 
 
 def save_forecast_to_file(
-        input_longitude: float, input_latitude: float,
+        user_id: str, input_longitude: float, input_latitude: float,
         grid_id: str, grid_x: int, grid_y: int,
         forecast_data: Dict[str, Any], is_hourly: bool, verbose: bool = False,
     ) -> str:
@@ -230,6 +230,7 @@ def save_forecast_to_file(
         
         # Construct record
         record = {
+            "user_id": user_id,
             "input_longitude": input_longitude,
             "input_latitude": input_latitude,
             "grid_id": grid_id,
@@ -307,6 +308,7 @@ def main():
     if forecast_data:
         logger.info("Successfully fetched forecast from NWS endpoint!")
         save_forecast_to_file(
+            user_id=args.user_id,
             input_longitude=args.longitude,
             input_latitude=args.latitude,
             grid_id=nearest_gridpoint["grid_id"],
