@@ -3,6 +3,8 @@ import sys
 import argparse
 import requests
 import json
+import re
+import pandas as pd
 from dotenv import load_dotenv
 from typing import Dict, Any, Optional, List, Tuple
 
@@ -125,11 +127,44 @@ def fetch_weather_forecast(grid_id: str, grid_x: int, grid_y: int, is_hourly: bo
         return None
 
 
-def save_forecast_to_file(forecast_data: Dict[str, Any], is_hourly: bool, verbose: bool = False) -> str:
+def parse_wind_speed(wind_speed_str: str) -> Tuple[int, int]:
     """
-    Process forecast data and save as TSV
+    Parse wind speed string to extract low and high values
     
     Args:
+        wind_speed_str: Wind speed string (e.g., "5 mph" or "6 to 13 mph")
+        
+    Returns:
+        Tuple of (wind_speed_low, wind_speed_high)
+    """
+    if "to" in wind_speed_str:
+        match = re.search(r'(\d+)\s+to\s+(\d+)', wind_speed_str)
+        if match:
+            return int(match.group(1)), int(match.group(2))
+    else:
+        match = re.search(r'(\d+)', wind_speed_str)
+        if match:
+            value = int(match.group(1))
+            return value, value
+    
+    # Default if parsing fails
+    return 0, 0
+
+
+def save_forecast_to_file(
+        input_longitude: float, input_latitude: float,
+        grid_id: str, grid_x: int, grid_y: int,
+        forecast_data: Dict[str, Any], is_hourly: bool, verbose: bool = False,
+    ) -> str:
+    """
+    Process forecast data (JSON) and save as TSV
+    
+    Args:
+        input_longitude: Longitude coordinate in the original request
+        input_latitude: Latitude coordinate in the original request
+        grid_id: Grid ID (office code of weather station)
+        grid_x: Grid X number
+        grid_y: Grid Y number
         forecast_data: Forecast data from API
         is_hourly: Whether this is hourly forecast data
         verbose: Whether to log detailed information
@@ -137,19 +172,94 @@ def save_forecast_to_file(forecast_data: Dict[str, Any], is_hourly: bool, verbos
     Returns:
         Path to the saved file
     """
+    filename_substr = "forecast_" + ("hourly" if is_hourly else "daily")
     file_path = os.path.join(
         project_root, 
         "data", 
         "forecast_hourly" if is_hourly else "forecast_daily", 
-        "temp.txt"
+        filename_substr + ".tsv"
     )
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     
-    with open(file_path, 'w', encoding='utf-8') as f:
+    # Store original JSON for debugging just in case
+    json_path = os.path.join(
+        project_root, 
+        "data", 
+        "forecast_hourly" if is_hourly else "forecast_daily", 
+        filename_substr + "_raw.json"
+    )
+    with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(forecast_data, f, indent=4)
+    if verbose:
+        logger.info(f"Saved raw forecast API response to {json_path}")
+    
+    # Extract metadata from properties
+    try:
+        properties = forecast_data.get("properties", {})
+        generated_at = properties.get("generatedAt", "")
+        update_time = properties.get("updateTime", "")
+        valid_times = properties.get("validTimes", "")
+        periods = properties.get("periods", [])
+    except KeyError as e:
+        logger.error(f"Error extracting basic metadata under the 'properties' key from forecast data: {e}")
+        return None
+    
+    records = []
+
+    # Tabulation
+    for period in periods:
+        # Parse wind speed
+        wind_speed_low, wind_speed_high = parse_wind_speed(period.get("windSpeed", "0 mph"))
+        
+        # Get precipitation probability
+        prob_precip = None
+        if period.get("probabilityOfPrecipitation") and \
+            period["probabilityOfPrecipitation"].get("value") is not None:
+            prob_precip = period["probabilityOfPrecipitation"]["value"]
+        
+        # Construct record
+        record = {
+            "input_longitude": input_longitude,
+            "input_latitude": input_latitude,
+            "grid_id": grid_id,
+            "grid_x": grid_x,
+            "grid_y": grid_y,
+            "is_hourly": is_hourly,
+            "generated_at": generated_at,
+            "update_time": update_time,
+            "valid_times": valid_times,
+            "number": period.get("number", ""),
+            "name": period.get("name", ""),
+            "start_time": period.get("startTime", ""),
+            "end_time": period.get("endTime", ""),
+            "is_daytime": period.get("isDaytime", ""),
+            "temperature": period.get("temperature", ""),
+            "temperature_trend": period.get("temperatureTrend", ""),
+            "prob_precip": prob_precip,
+            "wind_speed_low": wind_speed_low,
+            "wind_speed_high": wind_speed_high,
+            "wind_direction": period.get("windDirection", ""),
+            "short_forecast": period.get("shortForecast", ""),
+            "detailed_forecast": period.get("detailedForecast", "")
+        }
+        
+        records.append(record)
+    
+    df = pd.DataFrame(records)
+    
+    file_exists = os.path.isfile(file_path)
+    df.to_csv(
+        file_path,
+        sep='\t',
+        index=False,
+        mode='a' if file_exists else 'w',  # Append if the output file exists, write if new
+        header=not file_exists   # Write header only if the output file doesn't exist
+    )
     
     if verbose:
-        logger.info(f"Saved forecast data to {file_path}")
+        logger.info(f"Processed and saved tabulated forecast data to {file_path}")
+    logger.info(f"Saved {len(periods)} forecast periods to {file_path}")
+    
     return file_path
 
 
@@ -186,7 +296,12 @@ def main():
     if forecast_data:
         logger.info("Successfully fetched forecast from NWS endpoint!")
         save_forecast_to_file(
-            forecast_data,
+            input_longitude=args.longitude,
+            input_latitude=args.latitude,
+            grid_id=nearest_gridpoint["grid_id"],
+            grid_x=nearest_gridpoint["grid_x"],
+            grid_y=nearest_gridpoint["grid_y"],
+            forecast_data=forecast_data,
             is_hourly=args.is_hourly,
             verbose=args.verbose
         )

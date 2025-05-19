@@ -97,24 +97,24 @@ def main():
 
 
     # Step 3: Run the equivalent of the bash command to load weather forecast data into the TimescaleDB
-    logger.info(">>> Step 3: Loading weather forecast data into TimescaleDB...")
-    result_3 = subprocess.run(
-        [
-            "python", 
-            "app/load/load_weather_forecasts.py", 
-            "--user-id", user_id,
-            "--latitude", str(latitude),
-            "--longitude", str(longitude),
-            "--verbose"
-        ],
-        check=False
-    )
+    # logger.info(">>> Step 3: Loading weather forecast data into TimescaleDB...")
+    # result_3 = subprocess.run(
+    #     [
+    #         "python", 
+    #         "app/load/load_weather_forecasts.py", 
+    #         "--user-id", user_id,
+    #         "--latitude", str(latitude),
+    #         "--longitude", str(longitude),
+    #         "--verbose"
+    #     ],
+    #     check=False
+    # )
     
-    if result_3.returncode == 0:
-        logger.info(">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.")
-    else:
-        logger.error(">>> Step 3: Failed to load weather forecast data into TimescaleDB.")
-        sys.exit(1)
+    # if result_3.returncode == 0:
+    #     logger.info(">>> Step 3: Successfully loaded weather forecast data into TimescaleDB.")
+    # else:
+    #     logger.error(">>> Step 3: Failed to load weather forecast data into TimescaleDB.")
+    #     sys.exit(1)
 
     # Trick to keep the `weather-microservice` container running indefinitely unless the user stops it
     try:
