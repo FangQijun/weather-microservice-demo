@@ -3,6 +3,7 @@ import sys
 import json
 import requests
 import random
+import argparse
 import pandas as pd
 import geopandas as gpd
 from dotenv import load_dotenv
@@ -94,7 +95,7 @@ def process_nws_responses(json_strings: list[str], output_path: str, verbose=Fal
         logger.info(f"Wrote {len(all_records)} records to {output_path}!")
 
 
-def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, batch_size=10, verbose=False):
+def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, batch_size=10, verbose=False) -> bool:
     """
     Fetch NWS gridpoint for the centroids in the grid shapefile
     
@@ -160,6 +161,7 @@ def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, bat
         except requests.exceptions.RequestException as e:
             count_failed_responses += 1
             logger.error(f"Error: {e}")
+            return False
         
         if i % batch_size == batch_size - 1 or i == last_index:
             count_batch += 1
@@ -174,8 +176,16 @@ def fetch_weather_points(shapefile_path, output_path, num_points_limit=None, bat
         >>> Out of {last_index + 1} API calls, we recorded {count_written_responses} successful ones. <<<"
     )
 
+    return True
 
-if __name__ == "__main__":
+
+def main():
+    parser = argparse.ArgumentParser(description='Weather Microservice')
+    parser.add_argument('--batch-size', type=int, required=True, help='Batch size for API calls')
+    parser.add_argument('--num-rows', type=int, required=True, help='Number of rows to process')
+    parser.add_argument('--verbose', action='store_true', help='Enable verbose logging')
+    args = parser.parse_args()
+
     timestamp_now = datetime.now().strftime("%Y%m%dT%H%M%S")
     shapefile_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -186,9 +196,14 @@ if __name__ == "__main__":
         "data", "gridpoints_file", f"gridpoints_contiguous_us{timestamp_now}.tsv"
     )
     # TODO: Missing an underscore in the filename.
-    fetch_weather_points(
+
+    success = fetch_weather_points(
         shapefile_path=shapefile_path,
         output_path=output_path,
-        batch_size=200,
-        verbose=False
+        batch_size=args.batch_size,
+        verbose=args.verbose
     )
+    return 0 if success else 1
+
+if __name__ == "__main__":
+    sys.exit(main())
