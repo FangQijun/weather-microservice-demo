@@ -62,8 +62,8 @@ def main():
         [
             "python",
             "app/load/load_gridpoints.py",
-            "--batch-size", "100",
-            "--num-rows", "1000",
+            "--batch-size", "200",
+            "--num-rows", "10000",
         ],
         # TODO: Remove the '--num-rows' argument in production, as it is only for testing purposes
         check=False

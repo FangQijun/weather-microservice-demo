@@ -1,22 +1,48 @@
 # Weather Microservice Demo
-A microservice for weather API data ETL
+A microservice that fetches weather forecast of a requested (longitude, latitude) in the contiguous U.S. (48 states + D.C.) from Nationa Weather Service (NWS) API and performs ETL processes.
 
 
-## Thought Processes
-1. It is a 2-step process to get the weather forecasts according to [this](https://www.weather.gov/documentation/services-web-api)
-   1. Step 1 is to inquire which [Gridpoint](https://weather-gov.github.io/api/gridpoints) (a 2.5km x 2.5km rectangle on the map of the United States represented by an office code consisting of 3 capital letters and two integers) a specific lat/lon is located in with a payload looking like `https://api.weather.gov/points/{latitude},{longitude}`
-   2. Step 2 is to obtain the grid forecast for a `gridpoint`, use the `/points` endpoint to retrieve the current grid forecast endpoint by coordinates with a payload looking like `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast` and `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast/hourly`
-2. Gridpoints WFO/x/y should not be considered static but won't be updated often according to these GitHub Q&A threads [[1](https://github.com/weather-gov/api/discussions/621),[2](https://github.com/weather-gov/api/discussions/746)]
-3. Given bullet points 1-2, we decided to do the following:
-   1. Create our own list of 2.5km x 2.5km grids that are almost identical to said `gridpoint`s to perfectly cover the entirety of contiguous US. There are approximately 1.26M to be exact; 
-   2. Every month, for each centroid of the grid, make a "Step 1" API call to get which `gridpoint` the centroid, therefore the grid corresponds to (e.g. The 2.5km x 2.5km grid near Topeka, KS `[[-97.0799, 39.7451], [-97.0803, 39.7672], [-97.109, 39.7668], [-97.1085, 39.7448], [-97.0799, 39.7451]]` corresponds to Gridpoint `TOP/32,81`). Here are two examples showcasing how the grids indeed cover up the whole country.
-![New England](screenshots/Grid_Coverage_New_England_BW.png)
-![Greater Boston & RI](screenshots/Grid_Coverage_Greater_Boston_RI_BW.png)
-   3. With all the API responses, we can set up an SCD2 lookup table on our own database to find out which Gridpoint a requested lat/lon belongs to. To pull such mapping offline, instead of making an API call each time a request comes in, we reduced latency and enhanced reliability.
+## 1. Results
+First thing first, all tables ingested:![Result_All_Tables_Ingested](screenshots/Result_All_Tables_Ingested.png)
+- [Sample](screenshots/Table_Sample_1_"gridpoints".txt) of table `gridpoints`
+- [Sample](screenshots/Table_Sample_2_"dim_gridpoints".txt) of table `dim_gridpoints`
+- [Sample](screenshots/Table_Sample_3_"daily_forecasts".txt) of table `daily_forecasts`
+- [Sample](screenshots/Table_Sample_4_"hourly_forecasts".txt) of table `hourly_forecasts`
+- [Sample](screenshots/Table_Sample_5_"forecasts_hourly_metrics") of table `forecasts_hourly_metrics`
+
+## 2. Thought Process & Engineering Design
+### 2.1 Choice of DB
+We were given 4 candidate databases to consider: PostgreSQL, MongoDB, TimescaleDB, InfluxDB. TimescaleDB, **or more accurately speaking, a PostgreSQL DB with both TimescaleDB and PostGIS extensions was choosen**. Justifications are:
+- TimescaleDB is built on PostgreSQL, giving you both powerful **time-series optimization** and full SQL capabilities, including window functions and moving averages calculation.
+- Our data contains latitude/longitude coordinates. TimescaleDB with PostGIS extension provides excellent **geospatial functions** for calculating distances between coordinates, which was proven to be right in the data transformation step.
+- It is mentioned that the scale of requests would be thousands of calculations per minute, indicating **high-throughput OLTP requirements**. TimescaleDB is designed to handle high write throughput while maintaining query performance.
+
+In comparison, drawbacks of the other DBs are:
+- <ins>PostgreSQL</ins>: Lacks time-series optimizations.
+- <ins>MongoDB</ins>: NoSQL approach sacrifices the SQL window functionality.
+- <ins>InfluxDB</ins>: Great for time-series but more limited SQL capabilities and less suited for mixed OLTP workloads.
+
+### 2.2 Overview of ETL Process
+1. The NWS website wants us to do a 2-step process to get the weather forecasts, according to [this](https://www.weather.gov/documentation/services-web-api)
+   1. **Step 1**: Inquire which [Gridpoint](https://weather-gov.github.io/api/gridpoints) (a 2.5km x 2.5km rectangle on the map of the United States, denoted by 3 capital letters and two integers, e.g. "TOP/32,81") the requested lat/lon is located in, using URL `https://api.weather.gov/points/{latitude},{longitude}`
+   2. **Step 2**: Obtain the daily/hourly grid forecast of a `gridpoint`, use the `points` endpoint to retrieve the current grid forecast endpoint by coordinates with URLs `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast` and `https://api.weather.gov/gridpoints/{office}/{gridX},{gridY}/forecast/hourly`
+2. Meanwhile, we are reminded by NWS engineers that Gridpoints "WFO/x,y" should not be assumed static but won't be updated often, according to these GitHub Q&A threads [[1](https://github.com/weather-gov/api/discussions/621),[2](https://github.com/weather-gov/api/discussions/746)]
+3. Given above facts, we decided to **build our own coordinates-to-gridpoint lookup table** with the following steps. The benefit is to pull such mapping "offline", instead of making one extra API call each time a request comes in, and hence to reduce latency and enhance reliability.
+   1. Create our own collection of 2.5km x 2.5km grids perfectly cover the entirety of contiguous U.S. There are approximately 1.26 million of them, to be exact. Here are two examples showcasing how these grids together (zoom in you'll see white squares) indeed cover the whole country. I can't show the entire country covered by white squares without crashing Google Earth Pro<sup>TM</sup>.
+*New England*![New England](screenshots/Grid_Coverage_New_England_BW.png)
+*East Massachusetts & Rhode Island*![Greater Boston & RI](screenshots/Grid_Coverage_Greater_Boston_RI_BW.png)
+   2. For each centroid of said self-built grids, make an API call against the `points` endpoint in "Step 1" to get which `gridpoint` the centroid corresponds to, then ingest into PostgreSQL database with postGIS extension. We have a coordinates-to-gridpoint lookup table.
+   3. To ensure all entries in the lookup table are refreshed monthly, either do a whole round of 1.26 million API calls against the `points` endpoint every month, which takes about 96 hours to finish. Or, refresh 1/30 of the 1.26 million API calls (around 42,000) daily, which takes about 3.2 hours daily. Such scheduling shall be orchestrated by Airflow/Astronomer (not implemented in this repo).
+   4. A SCD2 table of the coordinates-to-gridpoint lookup table should be created on our PostgreSQL database, in case we need historical data for troubleshooting (not implemented in this repo).
+4. As an example, we receive a weather forecast request from Washington, KS at coordinate (39.746, -97.083). The microservice will initiate the following ETL procedure:
+   1. Lookup the coordinates-to-gridpoint mapping table. **Get the grid whose centroid coordinate is closest to the requested coordinate** (39.746, -97.083). In this case it's a grid centered at Topeka, KS `[[-97.0799, 39.7451], [-97.0803, 39.7672], [-97.109, 39.7668], [-97.1085, 39.7448], [-97.0799, 39.7451]]`;
+   2. The grid corresponds to NWS Gridpoint with an ID `TOP/32,81`.
+   3. Retrieve the daily/hourly weather forecasts of NWS Gridpoint `TOP/32,81` from the `forecast` endpoint in "Step 2". That's the forecast of the requested coordinate (39.746, -97.083).
+   4. Now that we have the forecast data and its NWS Gridpoint info, we can calculate the derived metrics mentioned in the assignment.
 
 
-## Replay
-### Run in a Docker container
+## 3. Replay
+### 3.1 Run in a Docker container
 1. Prerequisites
    - Install Docker and Docker Compose CLIs. Check if you have both CLIs by running `docker --version` and `docker-compose --version`. If not, refer to the [installation instructions](https://docs.docker.com/compose/install/). Also, ensure Docker has sufficient resources allocated (e.g., at least 2 CPUs and 4GB of memory). Adjust these settings in Docker Desktop under menu `Settings > Resources`.
    - (Optional) Install [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) for a more interactive UI than CLIs.
@@ -42,26 +68,28 @@ A microservice for weather API data ETL
    DB_PASSWORD=postgres
    ```
 4. (Optional for Local Testing, and time-consuming) Install Timescale DB locally: Follow the steps in Section `Local Testing: Local TimescaleDB Setup` of this `README` file below ↓.
-5. Ensure required data files exist: Place the required `.tsv` files for gridpoints data in the gridpoints_file directory, including:
-   - The mapping data between a sample of coordinates in the contiguous U.S. and NWS gridpoints, with a filename `gridpoints_contiguous_us_[YYYYMMDD]T[HHRRSS].tsv`
-<!--- TODO: Add more input files needed here --->
+5. (Optional but highly recommended) As mentioned, it takes the microservice around 96 hours to get the info of all NWS gridpoints. Alternatively, you can
+   - Either simply place a sample file `gridpoints_contiguous_us_20250514T194841.tsv` under directory `./data/gridpoints_file` to move forward.
+   - Or, the full TSV file (498MB) can be download [here](https://drive.google.com/file/d/18jA2dB_8H1zXSN-tJSI0w6ISF2fuVEVU/view?usp=drive_link).
 6. At the project root directory,
-   1. Run `docker-compose up --build` to always rebuild the Docker images before starting the containers in case you made changes to `Dockerfile` or the code base, then to create and start the containers as defined in your `docker-compose.yml` file. The following will occurr in the order of...
-      - A PostgreSQL service with both TimescaleDB & PostGIS extensions will be spun up. 
-      - The `weather-microservice` service will be spun up.
-      - As defined in `Dockerfile`, `app/main.py` will be run so that...
+   1. Run `docker-compose up` to start the Docker images. Or, run `docker-compose up --build` to rebuild the Docker images before starting the containers in case you made changes to `Dockerfile` or the code base, then to create and start the containers as defined in your `docker-compose.yml` file. The following will occurr in the order of...
+      - A PostgreSQL image with both TimescaleDB & PostGIS extensions will be spun up. This is a precursor of our microservice.
+      - The `weather-microservice` image will be spun up.
+      - As defined in `Dockerfile`, `app/main.py` will be executed so that...
          - A table schema for gridpoints data will be initialized.
          - Connection to Timescale DB will be tested.
-         - 'gridpoints' data will be loaded into PostgreSQL DB.
-         - ...
+         - Make said 1.26 million API calls against the `points` endpoint to build the coordinates-to-gridpoint lookup table.
+         - Create the coordinates-to-gridpoint lookup table `gridpoints` in PostgreSQL DB.
+         - Data Normalization: A `dim_gridpoints` table will be created in PostgreSQL DB with the info such as identifier, polygon and centroid of unique NWS Gridpoints seen in lookup table `gridpoints`.
+         - Mimick a scenario when one single weather forecast request comes in, and extract daily & hourly forecasts from the NWS API. Then load the request result in tables `daily_forecasts` and `hourly_forecasts`.
+         - Since the 4 required "Derived Data Points" are all about hourly statistics, perform data transformation towards table `hourly_forecasts` with the 4 required statistics included. Then insert the results into table `forecasts_hourly_metrics`.
    2. (Optional) Open a second terminal tab in either `Terminal.app` or your coding GUI. Run `docker ps` to verify two services are running indeed - one says "weather-microservice-demo-app" and the other says "timescale/timescaledb-ha:pg16". If you had Docker Desktop installed, it'll show two active containers.
-<!--- TODO: Add more things app/main.py does here --->
    3. (Optional) Run `docker exec -it weather-microservice bash` to enter the project root directory of the `weather-microservice` service, in case you need to play around or troubleshoot.
    4. (Optional) Run `docker exec -it timescale-db psql -U postgres -d weather_db` to log in the PostgreSQL DB `weather_db`, in case you need to run some SQL queries in it.
    5. (Optional) Run `docker logs weather-microservice` or `docker logs timescale-db` to look at the logs of the two services in case of troubleshooting.
    6. In the second terminal tab, run `docker-compose down` to stop all containers started by `docker-compose` and remove the stopped containers, networks, and default volumes to leave your system clean. Go back to the first terminal tab - you should see all Docker containers killed. If you had Docker Desktop installed, it'll say something like "The compose app is no longer running"
 
-### Local Test: Local TimescaleDB Setup
+### (Optional) 3.2 Local Test: Local TimescaleDB Setup
 On macOS, run the following installation steps **locally but globally**, namely on the `Terminal.app` of your Mac device, outside a Docker container, and outside a Poetry virtual env. It will be a dreary experience, and note that **YMMV regarding the file paths** mentioned depending on the installation path of your `Homebrew`.
 1. Clean up. Run `cd ~ && ls /opt/homebrew/var | grep postgresql` to check what PostgreSQL versions you've probably already installed on your Mac. For each version, uninstall it by running `brew uninstall --force postgresql@16` and `rm -rf /opt/homebrew/var/postgresql@16`
 
@@ -155,7 +183,7 @@ SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
 (1 row)
 ```
 
-### More Local Tests
+### 3.3 (Optional) More Local Tests
 To test the Timescale DB connection from a module
 ```zsh
 python src/database/timescale_db_connection.py
@@ -179,25 +207,25 @@ python app/load/load_gridpoints.py --batch-size 1000 --num-rows 30000 --mode a
 ```
 
 
-## Ambitions / Improvement Opportunities
+## 4. Ambitions / Improvement Opportunities
 - For simplicity, there are only a database `weather_db` and a few tables created in TimescaleDB, but no schema was created for better data cataloging.
 - Some tables in TimescaleDB (e.g. `gridpoints`) needs a SCD2 setup, but unfortunately I ran out of time.
+- Forgot to adopt the naming convention of the Star Schema. For instance, table `gridpoints` really should be called `fact_coordinates_gridpoints` instead. When I realized it, I was too scared to make a change.
+- As mentioned, with limited time, an Airflow/Astronomer server wasn't implemented for data task orchestration. It's a crucial component of ETL pipeline automation, after all.
 - Deduplication of `forecast_` tables were done with a TimescaleDB SQL query in function `load_forecast_from_tsv()`, but it really needs to happen earlier on cache/application level to avoid DDoS attacks.
 - With limited time, I didn't quite have a chance to implement unit and integration tests or configure a CI/CD pipeline
 - Here, the data transformation was done with SQL queries wrapped by a Python script. It'd be more elegant to use a local **dbt server** with `dbt-core` CLI.
-- Again, with limited time, I didn't quite have a chance to defend my app against potential scalability issues
-   - A
-   - B
-<!--- TODO: scalability ideas --->
+- Again, I didn't quite have a chance to defend my app against potential scalability issues
+   - Some of the local staging filename has a static name. If multiple requests are received simultaneously, that staging file might be overwritten by the next request before the ETL process of the previous hasn't finished yet.
+   - Step 1.1 & 1.2 in `./app/main.py` is slow. Takes days, but luckily this is a one-time execution as a kickstart of the microservice.
 
-
-## Project References
+## 5. Project References
 1. [National Weather Service API](https://www.weather.gov/documentation/services-web-api)
 2. National Weather Service API [forecast update schedule](https://www.weather.gov/gid/nwr_general), hourly weather forecasts are updated every hour approximately 5 minutes after the top of the hour.
 3. [U.S. States coordinate polygon data](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2024&layergroup=States+%28and+equivalent%29) from U.S. Census.
 4. Latest Docker image of Timescale DB [[1](https://hub.docker.com/r/timescale/timescaledb-ha), [2](https://github.com/timescale/timescaledb-docker-ha/)].
 5. [pygris](https://walker-data.com/pygris/), a Python package to help users access US Census Bureau TIGER/Line and cartographic boundary shapefiles and load them into Python as GeoDataFrames.
-6. [Google Earth Pro](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize `.shp` files downloaded or you created yourself.
+6. [Google Earth Pro<sup>TM</sup>](https://www.google.com/earth/outreach/learn/importing-geographic-information-systems-gis-data-in-google-earth/) to visualize `.shp` files downloaded or you created yourself.
 7. Web tool to [visualize WKT strings](https://wktmap.com/) of Geo-objects under various EPSG versions (namely, Coordinate Reference Systems (CRSs)). For example the two systems involved in the app are:
    1. EPSG:4326, also known as WGS 84, is a geodetic coordinate system representing latitude and longitude on the surface of the Earth.
    2. EPSG:5070 is a projected coordinate system, specifically the Albers Equal Area Conic projection for the contiguous United States, using the NAD 1983 datum.

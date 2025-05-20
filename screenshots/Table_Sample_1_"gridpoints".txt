@@ -1,0 +1,121 @@
+weather_db=# SELECT * FROM gridpoints LIMIT 6;
+-[ RECORD 1 ]------------+---------------------------------------------------------------
+id                       | 1
+api_call_id              | https://api.weather.gov/points/49.3628,-95.1497
+centroid_lon             | -95.1497
+centroid_lat             | 49.3628
+centroid_point           | 0101000020E6100000840D4FAF94C957C0917EFB3A70AE4840
+centroid_srid            | 0101000020E6100000840D4FAF94C957C0917EFB3A70AE4840
+geog                     | 0101000020E6100000840D4FAF94C957C0917EFB3A70AE4840
+grid_id                  | FGF
+grid_x                   | 153
+grid_y                   | 175
+forecast_url             | https://api.weather.gov/gridpoints/FGF/153,175/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/153,175/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/153,175
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/153,175/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00
+-[ RECORD 2 ]------------+---------------------------------------------------------------
+id                       | 2
+api_call_id              | https://api.weather.gov/points/49.3626,-95.1157999
+centroid_lon             | -95.1157999
+centroid_lat             | 49.3626
+centroid_point           | 0101000020E610000053D8FB4369C757C0CAC342AD69AE4840
+centroid_srid            | 0101000020E610000053D8FB4369C757C0CAC342AD69AE4840
+geog                     | 0101000020E610000053D8FB4369C757C0CAC342AD69AE4840
+grid_id                  | FGF
+grid_x                   | 154
+grid_y                   | 175
+forecast_url             | https://api.weather.gov/gridpoints/FGF/154,175/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/154,175/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/154,175
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/154,175/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00
+-[ RECORD 3 ]------------+---------------------------------------------------------------
+id                       | 5
+api_call_id              | https://api.weather.gov/points/49.34,-95.15
+centroid_lon             | -95.15
+centroid_lat             | 49.34
+centroid_point           | 0101000020E61000009A99999999C957C0EC51B81E85AB4840
+centroid_srid            | 0101000020E61000009A99999999C957C0EC51B81E85AB4840
+geog                     | 0101000020E61000009A99999999C957C0EC51B81E85AB4840
+grid_id                  | FGF
+grid_x                   | 153
+grid_y                   | 174
+forecast_url             | https://api.weather.gov/gridpoints/FGF/153,174/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/153,174/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/153,174
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/153,174/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00
+-[ RECORD 4 ]------------+---------------------------------------------------------------
+id                       | 6
+api_call_id              | https://api.weather.gov/points/49.3397999,-95.1161
+centroid_lon             | -95.1161
+centroid_lat             | 49.3397999
+centroid_point           | 0101000020E610000033C4B12E6EC757C090D728907EAB4840
+centroid_srid            | 0101000020E610000033C4B12E6EC757C090D728907EAB4840
+geog                     | 0101000020E610000033C4B12E6EC757C090D728907EAB4840
+grid_id                  | FGF
+grid_x                   | 154
+grid_y                   | 174
+forecast_url             | https://api.weather.gov/gridpoints/FGF/154,174/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/154,174/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/154,174
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/154,174/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00
+-[ RECORD 5 ]------------+---------------------------------------------------------------
+id                       | 7
+api_call_id              | https://api.weather.gov/points/49.3396,-95.0822
+centroid_lon             | -95.0822
+centroid_lat             | 49.3396
+centroid_point           | 0101000020E6100000CCEEC9C342C557C05DDC460378AB4840
+centroid_srid            | 0101000020E6100000CCEEC9C342C557C05DDC460378AB4840
+geog                     | 0101000020E6100000CCEEC9C342C557C05DDC460378AB4840
+grid_id                  | FGF
+grid_x                   | 155
+grid_y                   | 174
+forecast_url             | https://api.weather.gov/gridpoints/FGF/155,174/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/155,174/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/155,174
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/155,174/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00
+-[ RECORD 6 ]------------+---------------------------------------------------------------
+id                       | 9
+api_call_id              | https://api.weather.gov/points/49.3392,-95.0144
+centroid_lon             | -95.0144
+centroid_lat             | 49.3392
+centroid_point           | 0101000020E6100000FE43FAEDEBC057C0CF66D5E76AAB4840
+centroid_srid            | 0101000020E6100000FE43FAEDEBC057C0CF66D5E76AAB4840
+geog                     | 0101000020E6100000FE43FAEDEBC057C0CF66D5E76AAB4840
+grid_id                  | FGF
+grid_x                   | 158
+grid_y                   | 174
+forecast_url             | https://api.weather.gov/gridpoints/FGF/158,174/forecast
+forecast_hourly_url      | https://api.weather.gov/gridpoints/FGF/158,174/forecast/hourly
+forecast_office_url      | https://api.weather.gov/offices/FGF
+forecast_grid_data_url   | https://api.weather.gov/gridpoints/FGF/158,174
+observation_stations_url | https://api.weather.gov/gridpoints/FGF/158,174/stations
+forecast_zone_url        | https://api.weather.gov/zones/forecast/MNZ006
+time_zone                | America/Chicago
+radar_station            | KMVX
+created_at               | 2025-05-20 02:17:48.402721+00

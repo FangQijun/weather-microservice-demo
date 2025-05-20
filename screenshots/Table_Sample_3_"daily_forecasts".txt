@@ -1,0 +1,175 @@
+weather_db=# SELECT * FROM daily_forecasts LIMIT 6;
+-[ RECORD 1 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 1
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 1
+name                      | Tonight
+start_time                | 2025-05-20 04:00:00+00
+end_time                  | 2025-05-20 11:00:00+00
+is_daytime                | f
+temperature               | 37
+temperature_trend         | NaN
+probability_precipitation | 70
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 14
+wind_speed_high           | 14
+wind_direction            | E
+short_forecast            | Rain Showers Likely
+detailed_forecast         | Rain showers likely. Cloudy. Low around 37, with temperatures rising to around 40 overnight. East wind around 14 mph, with gusts as high as 22 mph. Chance of precipitation is 70%. New rainfall amounts between a tenth and quarter of an inch possible.
+created_at                | 2025-05-20 04:11:29.241344+00
+-[ RECORD 2 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 2
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 2
+name                      | Tuesday
+start_time                | 2025-05-20 11:00:00+00
+end_time                  | 2025-05-20 23:00:00+00
+is_daytime                | t
+temperature               | 53
+temperature_trend         | NaN
+probability_precipitation | 90
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 15
+wind_speed_high           | 15
+wind_direction            | E
+short_forecast            | Rain Showers
+detailed_forecast         | Rain showers. Cloudy, with a high near 53. East wind around 15 mph, with gusts as high as 22 mph. Chance of precipitation is 90%. New rainfall amounts between a quarter and half of an inch possible.
+created_at                | 2025-05-20 04:11:29.241344+00
+-[ RECORD 3 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 3
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 3
+name                      | Tuesday Night
+start_time                | 2025-05-20 23:00:00+00
+end_time                  | 2025-05-21 11:00:00+00
+is_daytime                | f
+temperature               | 38
+temperature_trend         | NaN
+probability_precipitation | 40
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 7
+wind_speed_high           | 12
+wind_direction            | NE
+short_forecast            | Chance Rain Showers
+detailed_forecast         | A chance of rain showers. Mostly cloudy. Low around 38, with temperatures rising to around 40 overnight. Northeast wind 7 to 12 mph, with gusts as high as 18 mph. Chance of precipitation is 40%. New rainfall amounts less than a tenth of an inch possible.
+created_at                | 2025-05-20 04:11:29.241344+00
+-[ RECORD 4 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 4
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 4
+name                      | Wednesday
+start_time                | 2025-05-21 11:00:00+00
+end_time                  | 2025-05-21 23:00:00+00
+is_daytime                | t
+temperature               | 61
+temperature_trend         | NaN
+probability_precipitation | 30
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 8
+wind_speed_high           | 12
+wind_direction            | NE
+short_forecast            | Chance Rain Showers
+detailed_forecast         | A chance of rain showers. Mostly cloudy, with a high near 61. Northeast wind 8 to 12 mph. Chance of precipitation is 30%. New rainfall amounts less than a tenth of an inch possible.
+created_at                | 2025-05-20 04:11:29.241344+00
+-[ RECORD 5 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 5
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 5
+name                      | Wednesday Night
+start_time                | 2025-05-21 23:00:00+00
+end_time                  | 2025-05-22 11:00:00+00
+is_daytime                | f
+temperature               | 39
+temperature_trend         | NaN
+probability_precipitation | 20
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 5
+wind_speed_high           | 9
+wind_direction            | N
+short_forecast            | Slight Chance Rain Showers then Mostly Cloudy
+detailed_forecast         | A slight chance of rain showers before 7pm. Mostly cloudy, with a low around 39. North wind 5 to 9 mph. Chance of precipitation is 20%.
+created_at                | 2025-05-20 04:11:29.241344+00
+-[ RECORD 6 ]-------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+id                        | 6
+request_timestamp         | 2025-05-20 04:11:27.290395+00
+user_id                   | demo_user
+input_longitude           | -97.683401
+input_latitude            | 48.922601
+grid_id                   | FGF
+grid_x                    | 73
+grid_y                    | 155
+is_hourly                 | f
+generated_at              | 2025-05-20 04:11:28+00
+update_time               | 2025-05-20 03:46:05+00
+valid_times               | 2025-05-19T21:00:00+00:00/P7DT7H
+number                    | 6
+name                      | Thursday
+start_time                | 2025-05-22 11:00:00+00
+end_time                  | 2025-05-22 23:00:00+00
+is_daytime                | t
+temperature               | 68
+temperature_trend         | NaN
+probability_precipitation | NaN
+dew_point                 | NaN
+relative_humidity         | NaN
+wind_speed_low            | 6
+wind_speed_high           | 9
+wind_direction            | N
+short_forecast            | Sunny
+detailed_forecast         | Sunny, with a high near 68. North wind 6 to 9 mph.
+created_at                | 2025-05-20 04:11:29.241344+00

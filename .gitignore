@@ -13,6 +13,7 @@ logs/transform/*
 # But keep the .gitkeep files
 !data/.gitkeep
 !data/gridpoints_file/.gitkeep
+!data/gridpoints_file/gridpoints_contiguous_us_20250514T194841.tsv
 !data/shapefile/.gitkeep
 !data/forecast_daily/.gitkeep
 !data/forecast_enriched/.gitkeep
