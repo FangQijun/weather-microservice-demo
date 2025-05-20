@@ -1,0 +1,91 @@
+weather_db=# SELECT * FROM dim_gridpoints LIMIT 6;
+-[ RECORD 1 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 1
+id                    | https://api.weather.gov/gridpoints/BIS/11,145
+grid_id               | BIS
+grid_x                | 11
+grid_y                | 145
+elevation             | 638.8608
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-104.0239 48.7346, -104.026 48.7553, -104.0574 48.7539, -104.0552 48.7331999, -104.0239 48.7346))
+polygon               | 0103000020E61000000100000005000000F697DD9387015AC020D26F5F075E48408B6CE7FBA9015AC09B559FABAD60484096B20C71AC035AC02A3A92CB7F6048404FAF946588035AC01AF78B7ED95D4840F697DD9387015AC020D26F5F075E4840
+polygon_srid          | 0103000020E61000000100000005000000F697DD9387015AC020D26F5F075E48408B6CE7FBA9015AC09B559FABAD60484096B20C71AC035AC02A3A92CB7F6048404FAF946588035AC01AF78B7ED95D4840F697DD9387015AC020D26F5F075E4840
+polygon_centroid      | 0101000020E6100000253C649E99025AC03CE004C3435F4840
+polygon_centroid_srid | 0101000020E6100000253C649E99025AC03CE004C3435F4840
+polygon_centroid_lon  | -104.04062614239281
+polygon_centroid_lat  | 48.74425542581636
+-[ RECORD 2 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 2
+id                    | https://api.weather.gov/gridpoints/BIS/11,146
+grid_id               | BIS
+grid_x                | 11
+grid_y                | 146
+elevation             | 638.8608
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-104.026 48.7553, -104.0281 48.775999999999996, -104.0594 48.7746, -104.0574 48.7539, -104.026 48.7553))
+polygon               | 0103000020E610000001000000050000008B6CE7FBA9015AC09B559FABAD6048402041F163CC015AC016D9CEF7536348407958A835CD035AC0A5BDC1172663484096B20C71AC035AC02A3A92CB7F6048408B6CE7FBA9015AC09B559FABAD604840
+polygon_srid          | 0103000020E610000001000000050000008B6CE7FBA9015AC09B559FABAD6048402041F163CC015AC016D9CEF7536348407958A835CD035AC0A5BDC1172663484096B20C71AC035AC02A3A92CB7F6048408B6CE7FBA9015AC09B559FABAD604840
+polygon_centroid      | 0101000020E6100000706502FDBB025AC09314F2B3E9614840
+polygon_centroid_srid | 0101000020E6100000706502FDBB025AC09314F2B3E9614840
+polygon_centroid_lon  | -104.04272389635094
+polygon_centroid_lat  | 48.76494454689341
+-[ RECORD 3 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 3
+id                    | https://api.weather.gov/gridpoints/BIS/11,147
+grid_id               | BIS
+grid_x                | 11
+grid_y                | 147
+elevation             | 640.08
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-104.028 48.776, -104.0301 48.7967, -104.0616 48.795300000000005, -104.0595 48.77460000000001, -104.028 48.776))
+polygon               | 0103000020E610000001000000050000006F1283C0CA015AC017D9CEF75363484004E78C28ED015AC0925CFE43FA654840C05B2041F1035AC02141F163CC6548402B8716D9CE035AC0A6BDC117266348406F1283C0CA015AC017D9CEF753634840
+polygon_srid          | 0103000020E610000001000000050000006F1283C0CA015AC017D9CEF75363484004E78C28ED015AC0925CFE43FA654840C05B2041F1035AC02141F163CC6548402B8716D9CE035AC0A6BDC117266348406F1283C0CA015AC017D9CEF753634840
+polygon_centroid      | 0101000020E610000017B7D100DE025AC01D0DE02D90644840
+polygon_centroid_srid | 0101000020E610000017B7D100DE025AC01D0DE02D90644840
+polygon_centroid_lon  | -104.0448
+polygon_centroid_lat  | 48.78565000000001
+-[ RECORD 4 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 4
+id                    | https://api.weather.gov/gridpoints/BIS/12,145
+grid_id               | BIS
+grid_x                | 12
+grid_y                | 145
+elevation             | 627.888
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-103.9925 48.7359, -103.9945 48.7566, -104.026 48.7553, -104.0239 48.7346, -103.9925 48.7359))
+polygon               | 0103000020E61000000100000005000000EC51B81E85FF59C02E90A0F8315E4840CFF753E3A5FF59C0A913D044D86048408B6CE7FBA9015AC09B559FABAD604840F697DD9387015AC020D26F5F075E4840EC51B81E85FF59C02E90A0F8315E4840
+polygon_srid          | 0103000020E61000000100000005000000EC51B81E85FF59C02E90A0F8315E4840CFF753E3A5FF59C0A913D044D86048408B6CE7FBA9015AC09B559FABAD604840F697DD9387015AC020D26F5F075E4840EC51B81E85FF59C02E90A0F8315E4840
+polygon_centroid      | 0101000020E610000088D8E82897005AC00D63C4FF6F5F4840
+polygon_centroid_srid | 0101000020E610000088D8E82897005AC00D63C4FF6F5F4840
+polygon_centroid_lon  | -104.00922606219149
+polygon_centroid_lat  | 48.745605440990495
+-[ RECORD 5 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 5
+id                    | https://api.weather.gov/gridpoints/BIS/12,146
+grid_id               | BIS
+grid_x                | 12
+grid_y                | 146
+elevation             | 638.8608
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-103.9945 48.7566, -103.9966 48.7774, -104.028 48.776, -104.02600000000001 48.755300000000005, -103.9945 48.7566))
+polygon               | 0103000020E61000000100000005000000CFF753E3A5FF59C0A913D044D860484064CC5D4BC8FF59C088F4DBD7816348406F1283C0CA015AC017D9CEF7536348408C6CE7FBA9015AC09C559FABAD604840CFF753E3A5FF59C0A913D044D8604840
+polygon_srid          | 0103000020E61000000100000005000000CFF753E3A5FF59C0A913D044D860484064CC5D4BC8FF59C088F4DBD7816348406F1283C0CA015AC017D9CEF7536348408C6CE7FBA9015AC09C559FABAD604840CFF753E3A5FF59C0A913D044D8604840
+polygon_centroid      | 0101000020E61000003452B781B8005AC0ADF35BCB16624840
+polygon_centroid_srid | 0101000020E61000003452B781B8005AC0ADF35BCB16624840
+polygon_centroid_lon  | -104.01126139547779
+polygon_centroid_lat  | 48.76632062902295
+-[ RECORD 6 ]---------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+row_num               | 6
+id                    | https://api.weather.gov/gridpoints/BIS/12,147
+grid_id               | BIS
+grid_x                | 12
+grid_y                | 147
+elevation             | 641.9088
+geometry_type         | Polygon
+geometry_coordinates  | POLYGON ((-103.9966 48.7774, -103.9987 48.798, -104.0301 48.7967, -104.028 48.776, -103.9966 48.7774))
+polygon               | 0103000020E6100000010000000500000064CC5D4BC8FF59C088F4DBD781634840F9A067B3EAFF59C0A01A2FDD2466484004E78C28ED015AC0925CFE43FA6548406F1283C0CA015AC017D9CEF75363484064CC5D4BC8FF59C088F4DBD781634840
+polygon_srid          | 0103000020E6100000010000000500000064CC5D4BC8FF59C088F4DBD781634840F9A067B3EAFF59C0A01A2FDD2466484004E78C28ED015AC0925CFE43FA6548406F1283C0CA015AC017D9CEF75363484064CC5D4BC8FF59C088F4DBD781634840
+polygon_centroid      | 0101000020E61000007B75A3EEDA005AC071960133BD644840
+polygon_centroid_srid | 0101000020E61000007B75A3EEDA005AC071960133BD644840
+polygon_centroid_lon  | -104.0133625599173
+polygon_centroid_lat  | 48.787023902678705

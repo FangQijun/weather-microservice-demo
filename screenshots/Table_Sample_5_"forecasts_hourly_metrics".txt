@@ -1,0 +1,145 @@
+weather_db=# SELECT * FROM forecasts_hourly_metrics LIMIT 6;
+-[ RECORD 1 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 1
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 04:00:00+00
+end_time                         | 2025-05-20 05:00:00+00
+number                           | 1
+temperature                      | 52
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 1
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 18%
+-[ RECORD 2 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 2
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 05:00:00+00
+end_time                         | 2025-05-20 06:00:00+00
+number                           | 2
+temperature                      | 50
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 0.8571428571428571
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 25%
+-[ RECORD 3 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 3
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 06:00:00+00
+end_time                         | 2025-05-20 07:00:00+00
+number                           | 3
+temperature                      | 50
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 0.8571428571428571
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 31%
+-[ RECORD 4 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 4
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 07:00:00+00
+end_time                         | 2025-05-20 08:00:00+00
+number                           | 4
+temperature                      | 48
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 0.7142857142857143
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 29%
+-[ RECORD 5 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 5
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 08:00:00+00
+end_time                         | 2025-05-20 09:00:00+00
+number                           | 5
+temperature                      | 44
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 0.42857142857142855
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 27%
+-[ RECORD 6 ]--------------------+-----------------------------------------------------------------------------------------------------------------------------
+id                               | 6
+user_id                          | demo_user
+request_timestamp                | 2025-05-20 04:11:27.290395+00
+input_longitude                  | -97.683401
+input_latitude                   | 48.922601
+start_time                       | 2025-05-20 09:00:00+00
+end_time                         | 2025-05-20 10:00:00+00
+number                           | 6
+temperature                      | 41
+max_temperature_in_24hr_window   | 52
+min_temperature_in_24hr_window   | 38
+temperature_ratio_in_24hr_window | 0.21428571428571427
+wind_speed                       | 14
+wind_exceeds_daily_avg           | t
+grid_id                          | FGF
+grid_x                           | 73
+grid_y                           | 155
+grid_geometry_coordinates        | POLYGON ((-97.6653 48.9152, -97.6658999 48.935899899999995, -97.6975 48.9355, -97.69680000000001 48.9148, -97.6653 48.9152))
+grid_polygon_centroid_lon        | -97.6813753205736
+grid_polygon_centroid_lat        | 48.92535544340509
+lat_distance_from_forecast       | 0.002754443405088125
+lon_distance_from_forecast       | 0.0020256794264099653
+probability_precipitation        | 50%

@@ -3,7 +3,12 @@ A microservice that fetches weather forecast of a requested (longitude, latitude
 
 
 ## 1. Results
-
+First thing first, all tables ingested:![Result_All_Tables_Ingested](screenshots/Result_All_Tables_Ingested.png)
+- [Sample](screenshots/Table_Sample_1_"gridpoints".txt) of table `gridpoints`
+- [Sample](screenshots/Table_Sample_2_"dim_gridpoints".txt) of table `dim_gridpoints`
+- [Sample](screenshots/Table_Sample_3_"daily_forecasts".txt) of table `daily_forecasts`
+- [Sample](screenshots/Table_Sample_4_"hourly_forecasts".txt) of table `hourly_forecasts`
+- [Sample](screenshots/Table_Sample_5_"forecasts_hourly_metrics") of table `forecasts_hourly_metrics`
 
 ## 2. Thought Process & Engineering Design
 ### 2.1 Choice of DB
