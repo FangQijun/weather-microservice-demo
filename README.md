@@ -8,7 +8,7 @@ First thing first, all tables ingested:![Result_All_Tables_Ingested](screenshots
 - [Sample](screenshots/Table_Sample_2_"dim_gridpoints".txt) of table `dim_gridpoints`
 - [Sample](screenshots/Table_Sample_3_"daily_forecasts".txt) of table `daily_forecasts`
 - [Sample](screenshots/Table_Sample_4_"hourly_forecasts".txt) of table `hourly_forecasts`
-- [Sample](screenshots/Table_Sample_5_"forecasts_hourly_metrics") of table `forecasts_hourly_metrics`
+- [Sample](screenshots/Table_Sample_5_"forecasts_hourly_metrics".txt) of table `forecasts_hourly_metrics`
 
 ## 2. Thought Process & Engineering Design
 ### 2.1 Choice of DB
